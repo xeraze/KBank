@@ -34,15 +34,14 @@
             background: #1a1a1a !important; border: 1px solid #333 !important; color: white !important; 
             width: 100%; padding: 0.8rem 1.2rem; border-radius: 1rem; font-size: 0.9rem; margin-top: 0.4rem;
         }
-        input:focus { border-color: #ff3b3b !important; outline: none; }
+        input:focus, select:focus, textarea:focus { border-color: #ffffff !important; outline: none; }
         
         label { color: #888; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-left: 0.5rem; }
 
-        .btn-primary {
-            background: #fff; color: #000; font-weight: 900; transition: all 0.3s;
-        }
+        .btn-primary { background: #fff; color: #000; font-weight: 900; transition: all 0.3s; }
         .btn-primary:hover { transform: scale(1.02); box-shadow: 0 10px 20px rgba(255,255,255,0.1); }
         
+        .status-pending { color: #666 !important; }
         .hidden { display: none; }
     </style>
 </head>
@@ -50,8 +49,8 @@
 
     <div id="order-modal">
         <div class="modal-content">
-            <h3 class="text-2xl font-black mb-1 tracking-tighter uppercase italic">Оформлення кредиту</h3>
-            <p class="text-gray-500 text-xs mb-8 uppercase tracking-widest font-bold">KBank Security System</p>
+            <h3 class="text-2xl font-black mb-1 uppercase italic tracking-tighter">Оформлення кредиту</h3>
+            <p class="text-gray-500 text-[10px] mb-8 uppercase tracking-widest font-bold border-b border-white/5 pb-2">KBank Security System</p>
             
             <div class="space-y-4">
                 <div>
@@ -82,9 +81,7 @@
 
                 <div class="pt-6 flex gap-4">
                     <button onclick="closeModal('order-modal')" class="flex-1 text-sm font-bold text-gray-500 hover:text-white transition">СКАСУВАТИ</button>
-                    <button onclick="sendCreditRequest()" class="flex-[2] btn-primary py-4 rounded-2xl text-sm">
-                        ПІДТВЕРДИТИ ЗАЯВКУ
-                    </button>
+                    <button onclick="sendCreditRequest()" class="flex-[2] btn-primary py-4 rounded-2xl text-sm">ПІДТВЕРДИТИ</button>
                 </div>
             </div>
         </div>
@@ -92,38 +89,30 @@
 
     <div id="tariffs-modal">
         <div class="modal-content">
-            <h3 class="text-2xl font-black mb-6 tracking-tighter uppercase italic text-white text-center">Тарифи KBank</h3>
-            <div class="space-y-5">
-                <div class="flex justify-between items-center border-b border-white/5 pb-3">
-                    <span class="text-gray-400 text-sm">Відсоткова ставка</span>
-                    <span class="font-bold text-red-500">0.01% / день</span>
+            <h3 class="text-2xl font-black mb-6 uppercase italic tracking-tighter text-center">Тарифи банку</h3>
+            <div class="space-y-4">
+                <div class="flex justify-between border-b border-white/5 pb-2">
+                    <span class="text-gray-500 text-sm">Ставка</span>
+                    <span class="font-bold">0.01% / день</span>
                 </div>
-                <div class="flex justify-between items-center border-b border-white/5 pb-3">
-                    <span class="text-gray-400 text-sm">Максимальний ліміт</span>
-                    <span class="font-bold">1,000,000 ₴</span>
+                <div class="flex justify-between border-b border-white/5 pb-2">
+                    <span class="text-gray-500 text-sm">Ліміт</span>
+                    <span class="font-bold text-green-500">1,000,000 ₴</span>
                 </div>
-                <div class="flex justify-between items-center border-b border-white/5 pb-3">
-                    <span class="text-gray-400 text-sm">Кешбек на покупки</span>
-                    <span class="font-bold text-green-500">до 20%</span>
-                </div>
-                <div class="flex justify-between items-center border-b border-white/5 pb-3">
-                    <span class="text-gray-400 text-sm">Обслуговування</span>
-                    <span class="font-bold">0 ₴ / міс</span>
+                <div class="flex justify-between border-b border-white/5 pb-2">
+                    <span class="text-gray-500 text-sm">Обслуговування</span>
+                    <span class="font-bold">0 ₴</span>
                 </div>
             </div>
-            <div class="pt-8 text-center">
-                <button onclick="closeModal('tariffs-modal')" class="w-full btn-primary py-4 rounded-2xl text-sm uppercase">Зрозуміло</button>
-            </div>
+            <button onclick="closeModal('tariffs-modal')" class="w-full btn-primary py-4 rounded-2xl text-sm mt-8">ЗРОЗУМІЛО</button>
         </div>
     </div>
 
     <div id="success-modal">
         <div class="modal-content text-center">
-            <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i class="fas fa-paper-plane text-2xl"></i>
-            </div>
-            <h3 class="text-xl font-black mb-2 uppercase">Заявку надіслано!</h3>
-            <p class="text-gray-400 text-sm mb-8 leading-relaxed">Ми розглянемо ваш запит протягом наступних 48 годин. Відповідь надійде вам у ПП Discord.</p>
+            <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6"><i class="fas fa-paper-plane text-2xl"></i></div>
+            <h3 class="text-xl font-black mb-2 uppercase">Надіслано!</h3>
+            <p class="text-gray-400 text-sm mb-8 leading-relaxed">Заявка на розгляді. Консультант банку зв'яжиться з вами у ПП Discord.</p>
             <button onclick="closeModal('success-modal')" class="w-full btn-primary py-4 rounded-2xl text-sm">ЗРОЗУМІЛО</button>
         </div>
     </div>
@@ -131,19 +120,21 @@
     <nav class="p-6">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <img src="LOGO_MAIN.png" alt="KBank Logo" class="w-10 h-10 rounded-xl object-cover border border-white/10">
+                <img src="LOGO_MAIN.png" alt="Logo" class="w-10 h-10 rounded-xl object-cover border border-white/10">
                 <h1 class="text-2xl font-black italic tracking-tighter uppercase">K<span class="text-white/60">Bank</span></h1>
             </div>
-            
             <div id="auth-section">
                 <button id="login-btn" class="bg-[#5865F2] hover:bg-[#4752c4] px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 text-white">
-                    <i class="fab fa-discord"></i> Увійти через Discord
+                    <i class="fab fa-discord"></i> Увійти
                 </button>
                 <div id="user-profile" class="hidden flex items-center gap-4 bg-white/5 p-2 pr-5 rounded-2xl border border-white/5">
-                    <img id="user-avatar" src="" class="w-10 h-10 rounded-xl border border-white/10">
+                    <img id="user-avatar" src="" class="w-10 h-10 rounded-xl">
                     <div class="text-left">
                         <p id="user-name" class="text-sm font-black leading-none text-white"></p>
-                        <p id="user-credit" class="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-wider">Кредит: <span class="text-white">0 ₴</span></p>
+                        <p id="user-credit-wrap" class="text-[10px] text-gray-500 mt-1 uppercase font-bold">
+                            Кредит: <span id="credit-value" class="text-white">0 ₴</span>
+                            <span id="pending-icon" class="hidden ml-1"><i class="fas fa-question-circle"></i></span>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -154,26 +145,19 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
                 <h2 class="text-6xl font-black leading-none mb-6 tracking-tighter uppercase italic">Банк, який <br><span class="text-gray-500 text-4xl">розуміє тебе.</span></h2>
-                <p class="text-gray-400 text-lg mb-10 max-w-md font-medium">Отримуй кредити на нерухомість або авто миттєво. Без зайвих паперів та черг — тільки твій Discord та Roblox Nickname.</p>
-                
                 <div class="flex gap-4">
                     <button onclick="openModal()" class="btn-primary px-10 py-5 rounded-3xl text-sm uppercase">Оформити кредит</button>
-                    <button onclick="openTariffs()" class="bg-white/5 hover:bg-white/10 border border-white/10 px-10 py-5 rounded-3xl text-sm font-bold transition uppercase">Тарифи</button>
+                    <button onclick="openTariffs()" class="bg-white/5 border border-white/10 px-10 py-5 rounded-3xl text-sm font-bold transition uppercase">Тарифи</button>
                 </div>
             </div>
-
             <div class="relative">
                 <div class="mono-card p-8 aspect-video flex flex-col justify-between shadow-2xl relative z-10">
                     <div class="flex justify-between items-start">
                         <img src="LOGO_MAIN.png" class="w-12 h-12 rounded-lg opacity-80">
                         <i class="fas fa-wifi rotate-90 text-white/20 text-xl"></i>
                     </div>
-                    <div>
-                        <p class="text-xs text-white/30 uppercase tracking-widest font-bold mb-1">KBank Platinum</p>
-                        <p class="text-2xl font-bold tracking-widest text-white/90">•••• •••• •••• 2026</p>
-                    </div>
+                    <p class="text-2xl font-bold tracking-widest text-white/90">•••• •••• •••• 2026</p>
                 </div>
-                <div class="absolute -top-20 -right-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
             </div>
         </div>
     </main>
@@ -182,9 +166,14 @@
         const CLIENT_ID = '1488509930485841961';
         const WEBHOOK_URL = 'https://discord.com/api/webhooks/1488505884756938793/nx9kc5t7JlQAqN1cfIYraiTJqbOVaz5F-n1qZh-u-DPiW3VJ_4qE7BYCK_UKta-mDtjt';
         const REDIRECT_URI = window.location.href.split('#')[0].split('?')[0];
+        
+        const JSON_URL = 'https://raw.githubusercontent.com/xeraze/KBank/main/database.json';
 
-        function openTariffs() {
-            document.getElementById('tariffs-modal').style.display = 'flex';
+        function openTariffs() { document.getElementById('tariffs-modal').style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function openModal() {
+            if (!localStorage.getItem('kbank_user')) return alert('Будь ласка, спочатку увійдіть!');
+            document.getElementById('order-modal').style.display = 'flex';
         }
 
         document.getElementById('login-btn').onclick = () => {
@@ -198,26 +187,46 @@
                 const res = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${accessToken}` } });
                 const user = await res.json();
                 localStorage.setItem('kbank_user', JSON.stringify(user));
-                displayUser(user);
                 window.history.replaceState({}, document.title, REDIRECT_URI);
-            } else if (localStorage.getItem('kbank_user')) {
-                displayUser(JSON.parse(localStorage.getItem('kbank_user')));
             }
+            updateUI();
         };
 
-        function displayUser(u) {
+        async function updateUI() {
+            const user = JSON.parse(localStorage.getItem('kbank_user'));
+            if (!user) return;
+
             document.getElementById('login-btn').classList.add('hidden');
             document.getElementById('user-profile').classList.remove('hidden');
-            document.getElementById('user-name').innerText = u.username;
-            document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png`;
-        }
+            document.getElementById('user-name').innerText = user.username;
+            document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
 
-        function openModal() {
-            if (!localStorage.getItem('kbank_user')) return alert('Будь ласка, спочатку увійдіть через Discord!');
-            document.getElementById('order-modal').style.display = 'flex';
-        }
+            const valElem = document.getElementById('credit-value');
+            const iconElem = document.getElementById('pending-icon');
 
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+            try {
+                const response = await fetch(JSON_URL + '?t=' + new Date().getTime());
+                const db = await response.json();
+                const dbUser = db.users.find(u => u.id === user.id);
+
+                if (dbUser && dbUser.status === 'approved') {
+                    valElem.innerText = `${dbUser.amount} ₴`;
+                    valElem.className = 'text-white font-black';
+                    iconElem.classList.add('hidden');
+                    return;
+                }
+            } catch (e) { console.log("JSON database not found yet."); }
+
+            const localLoan = JSON.parse(localStorage.getItem('kbank_loan'));
+            if (localLoan && localLoan.status === 'pending') {
+                valElem.innerText = `${localLoan.amount} ₴`;
+                valElem.className = 'status-pending';
+                iconElem.classList.remove('hidden');
+            } else {
+                valElem.innerText = '0 ₴';
+                valElem.className = 'text-white opacity-20';
+            }
+        }
 
         async function sendCreditRequest() {
             const amount = document.getElementById('loan-amount').value;
@@ -226,37 +235,29 @@
             const purpose = document.getElementById('loan-purpose').value;
             const user = JSON.parse(localStorage.getItem('kbank_user'));
 
-            if (!amount || !nick || !purpose) return alert('Заповніть, будь ласка, всі поля!');
+            if (!amount || !nick || !purpose) return alert('Заповніть всі поля!');
 
-            const payload = {
-                embeds: [{
-                    title: "💳 НОВА ЗАЯВКА НА КРЕДИТ",
-                    color: 0xffffff,
-                    fields: [
-                        { name: "Сума", value: `\`${amount} ₴\``, inline: true },
-                        { name: "Термін", value: `\`${term} міс.\``, inline: true },
-                        { name: "Roblox Nick", value: `\`${nick}\``, inline: true },
-                        { name: "Мета", value: `\`\`\`${purpose}\`\`\`` },
-                        { name: "Клієнт", value: `<@${user.id}> (${user.username})`, inline: false }
-                    ],
-                    footer: { text: "KBank Central System" },
-                    timestamp: new Date()
-                }]
-            };
+            localStorage.setItem('kbank_loan', JSON.stringify({ amount, status: 'pending' }));
 
-            const res = await fetch(WEBHOOK_URL, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify(payload) 
+            await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    embeds: [{
+                        title: "💳 ЗАЯВКА НА КРЕДИТ",
+                        color: 0xffffff,
+                        fields: [
+                            { name: "Сума", value: `${amount} ₴`, inline: true },
+                            { name: "Термін", value: `${term} міс.`, inline: true },
+                            { name: "Клієнт", value: `<@${user.id}>` }
+                        ]
+                    }]
+                })
             });
 
-            if (res.ok) {
-                closeModal('order-modal');
-                document.getElementById('success-modal').style.display = 'flex';
-                document.getElementById('user-credit').innerHTML = `Кредит: <span class="text-white">${amount} ₴</span>`;
-            } else {
-                alert('Помилка сервера. Спробуйте пізніше.');
-            }
+            closeModal('order-modal');
+            document.getElementById('success-modal').style.display = 'flex';
+            updateUI();
         }
     </script>
 </body>
