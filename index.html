@@ -197,7 +197,11 @@
 
         async function updateUI() {
             const user = JSON.parse(localStorage.getItem('kbank_user'));
-            if (!user) return;
+            
+            if (!user) {
+                localStorage.removeItem('kbank_loan');
+                return;
+            }
 
             document.getElementById('login-btn').classList.add('hidden');
             document.getElementById('user-profile').classList.remove('hidden');
@@ -209,7 +213,7 @@
             hasActiveLoan = false;
 
             try {
-                const res = await fetch(JSON_URL + '?t=' + Date.now());
+                const res = await fetch(JSON_URL + '?nocache=' + Math.random());
                 const db = await res.json();
                 const dbUser = db.users.find(u => String(u.id) === String(user.id));
                 
@@ -223,7 +227,7 @@
                         return;
                     } else if (dbUser.status === 'paid') {
                         valElem.innerText = '0 ₴';
-                        valElem.className = 'text-white font-bold opacity-100';
+                        valElem.className = 'text-white opacity-20';
                         iconElem.classList.add('hidden');
                         hasActiveLoan = false;
                         localStorage.removeItem('kbank_loan');
@@ -235,8 +239,10 @@
                         hasActiveLoan = true;
                         return;
                     }
+                } else {
+                    localStorage.removeItem('kbank_loan');
                 }
-            } catch (e) { console.log("DB sync..."); }
+            } catch (e) { console.log("DB sync error"); }
 
             const local = JSON.parse(localStorage.getItem('kbank_loan'));
             if (local && local.status === 'pending') {
@@ -248,9 +254,9 @@
                 valElem.innerText = '0 ₴';
                 valElem.className = 'text-white opacity-20';
                 iconElem.classList.add('hidden');
+                hasActiveLoan = false;
             }
         }
-
         async function sendCreditRequest() {
             const amount = document.getElementById('loan-amount').value;
             const term = document.getElementById('loan-term').value;
