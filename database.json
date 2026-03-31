@@ -2,8 +2,8 @@
   "users": [
     {
       "id": "1404735389603860503",
-      "amount": 1000000000,
-      "status": "approved",
+      "amount": 1000000,
+      "status": "paid",
       "term": "8"
     },
     {
