@@ -11,6 +11,12 @@
       "amount": 15000,
       "status": "paid",
       "term": "2"
+    },
+    {
+      "id": "1404735389603860503",
+      "amount": 5000,
+      "status": "paid",
+      "term": "2"
     }
   ]
 }
