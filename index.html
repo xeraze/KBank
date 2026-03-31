@@ -23,7 +23,7 @@
             border-radius: 2rem;
         }
 
-        #order-modal, #success-modal { 
+        #order-modal, #success-modal, #tariffs-modal { 
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); 
             z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(12px);
         }
@@ -63,10 +63,10 @@
                     <div>
                         <label>Термін (міс.)</label>
                         <select id="loan-term">
-                            <option value="3">2 місяці</option>
-                            <option value="6">4 місяці</option>
-                            <option value="12">6 місяців</option>
-                            <option value="24">8 місяців</option>
+                            <option value="2">2 місяці</option>
+                            <option value="4">4 місяці</option>
+                            <option value="6">6 місяців</option>
+                            <option value="8">8 місяців</option>
                         </select>
                     </div>
                     <div>
@@ -90,6 +90,33 @@
         </div>
     </div>
 
+    <div id="tariffs-modal">
+        <div class="modal-content">
+            <h3 class="text-2xl font-black mb-6 tracking-tighter uppercase italic text-white text-center">Тарифи KBank</h3>
+            <div class="space-y-5">
+                <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                    <span class="text-gray-400 text-sm">Відсоткова ставка</span>
+                    <span class="font-bold text-red-500">0.01% / день</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                    <span class="text-gray-400 text-sm">Максимальний ліміт</span>
+                    <span class="font-bold">1,000,000 ₴</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                    <span class="text-gray-400 text-sm">Кешбек на покупки</span>
+                    <span class="font-bold text-green-500">до 20%</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                    <span class="text-gray-400 text-sm">Обслуговування</span>
+                    <span class="font-bold">0 ₴ / міс</span>
+                </div>
+            </div>
+            <div class="pt-8 text-center">
+                <button onclick="closeModal('tariffs-modal')" class="w-full btn-primary py-4 rounded-2xl text-sm uppercase">Зрозуміло</button>
+            </div>
+        </div>
+    </div>
+
     <div id="success-modal">
         <div class="modal-content text-center">
             <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -109,14 +136,14 @@
             </div>
             
             <div id="auth-section">
-                <button id="login-btn" class="bg-[#5865F2] hover:bg-[#4752c4] px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-3">
+                <button id="login-btn" class="bg-[#5865F2] hover:bg-[#4752c4] px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 text-white">
                     <i class="fab fa-discord"></i> Увійти через Discord
                 </button>
                 <div id="user-profile" class="hidden flex items-center gap-4 bg-white/5 p-2 pr-5 rounded-2xl border border-white/5">
                     <img id="user-avatar" src="" class="w-10 h-10 rounded-xl border border-white/10">
                     <div class="text-left">
-                        <p id="user-name" class="text-sm font-black leading-none"></p>
-                        <p id="user-credit" class="text-[10px] text-gray-500 mt-1">Кредит: <span class="text-white">0 ₴</span></p>
+                        <p id="user-name" class="text-sm font-black leading-none text-white"></p>
+                        <p id="user-credit" class="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-wider">Кредит: <span class="text-white">0 ₴</span></p>
                     </div>
                 </div>
             </div>
@@ -127,11 +154,11 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
                 <h2 class="text-6xl font-black leading-none mb-6 tracking-tighter uppercase italic">Банк, який <br><span class="text-gray-500 text-4xl">розуміє тебе.</span></h2>
-                <p class="text-gray-400 text-lg mb-10 max-w-md">Отримуй кредити на нерухомість або авто миттєво. Без зайвих паперів та черг — тільки твій Discord та Roblox Nickname.</p>
+                <p class="text-gray-400 text-lg mb-10 max-w-md font-medium">Отримуй кредити на нерухомість або авто миттєво. Без зайвих паперів та черг — тільки твій Discord та Roblox Nickname.</p>
                 
                 <div class="flex gap-4">
-                    <button onclick="openModal()" class="btn-primary px-10 py-5 rounded-3xl text-sm">ОФОРМИТИ КРЕДИТ</button>
-                    <button class="bg-white/5 hover:bg-white/10 border border-white/10 px-10 py-5 rounded-3xl text-sm font-bold transition">ТАРИФИ</button>
+                    <button onclick="openModal()" class="btn-primary px-10 py-5 rounded-3xl text-sm uppercase">Оформити кредит</button>
+                    <button onclick="openTariffs()" class="bg-white/5 hover:bg-white/10 border border-white/10 px-10 py-5 rounded-3xl text-sm font-bold transition uppercase">Тарифи</button>
                 </div>
             </div>
 
@@ -143,7 +170,7 @@
                     </div>
                     <div>
                         <p class="text-xs text-white/30 uppercase tracking-widest font-bold mb-1">KBank Platinum</p>
-                        <p class="text-2xl font-bold tracking-widest">•••• •••• •••• 2026</p>
+                        <p class="text-2xl font-bold tracking-widest text-white/90">•••• •••• •••• 2026</p>
                     </div>
                 </div>
                 <div class="absolute -top-20 -right-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
@@ -156,6 +183,10 @@
         const WEBHOOK_URL = 'https://discord.com/api/webhooks/1488505884756938793/nx9kc5t7JlQAqN1cfIYraiTJqbOVaz5F-n1qZh-u-DPiW3VJ_4qE7BYCK_UKta-mDtjt';
         const REDIRECT_URI = window.location.href.split('#')[0].split('?')[0];
 
+        function openTariffs() {
+            document.getElementById('tariffs-modal').style.display = 'flex';
+        }
+
         document.getElementById('login-btn').onclick = () => {
             window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
         };
@@ -163,7 +194,6 @@
         window.onload = async () => {
             const fragment = new URLSearchParams(window.location.hash.slice(1));
             const accessToken = fragment.get('access_token');
-            
             if (accessToken) {
                 const res = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${accessToken}` } });
                 const user = await res.json();
@@ -223,7 +253,6 @@
             if (res.ok) {
                 closeModal('order-modal');
                 document.getElementById('success-modal').style.display = 'flex';
-                // Визуальное обновление кредита в профиле (имитация)
                 document.getElementById('user-credit').innerHTML = `Кредит: <span class="text-white">${amount} ₴</span>`;
             } else {
                 alert('Помилка сервера. Спробуйте пізніше.');
