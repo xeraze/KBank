@@ -278,51 +278,55 @@
         };
 
         async function updateUI() {
-            const user = JSON.parse(localStorage.getItem('kbank_user'));
-            if (!user) return;
+    const user = JSON.parse(localStorage.getItem('kbank_user'));
+    if (!user) return;
 
-            document.getElementById('login-btn').classList.add('hidden');
-            document.getElementById('user-profile').classList.remove('hidden');
-            document.getElementById('user-name').innerText = user.username;
-            document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+    document.getElementById('login-btn').classList.add('hidden');
+    document.getElementById('user-profile').classList.remove('hidden');
+    document.getElementById('user-name').innerText = user.username;
+    document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
 
-            const valElem = document.getElementById('credit-value');
-            const iconElem = document.getElementById('pending-icon');
-            
-            hasActiveLoan = false;
+    const valElem = document.getElementById('credit-value');
+    const iconElem = document.getElementById('pending-icon');
+    
+    hasActiveLoan = false;
 
-            try {
-                const response = await fetch(JSON_URL + '?t=' + new Date().getTime());
-                const db = await response.json();
-                const dbUser = db.users.find(u => u.id === user.id);
+    try {
+        const response = await fetch(JSON_URL + '?t=' + new Date().getTime());
+        const db = await response.json();
+        const dbUser = db.users.find(u => u.id === user.id);
 
-                if (dbUser && dbUser.status === 'approved') {
-                    valElem.innerText = `${dbUser.amount.toLocaleString()} ₴`;
-                    valElem.className = 'text-white font-black';
-                    iconElem.classList.add('hidden');
-                    hasActiveLoan = true;
-                    return;
-                } else if (dbUser && dbUser.status === 'paid') {
-                    valElem.innerText = '0 ₴';
-                    valElem.className = 'text-white opacity-20';
-                    iconElem.classList.add('hidden');
-                    hasActiveLoan = false;
-                    return;
-                }
-            } catch (e) { console.log("JSON database check skip."); }
-
-            const localLoan = JSON.parse(localStorage.getItem('kbank_loan'));
-            if (localLoan && localLoan.status === 'pending') {
-                valElem.innerText = `${parseInt(localLoan.amount).toLocaleString()} ₴`;
-                valElem.className = 'status-pending font-bold';
-                iconElem.classList.remove('hidden');
+        if (dbUser) {
+            if (dbUser.status === 'approved') {
+                valElem.innerText = `${dbUser.amount.toLocaleString()} ₴`;
+                valElem.className = 'text-white font-black';
+                iconElem.classList.add('hidden');
                 hasActiveLoan = true;
-            } else {
+                localStorage.removeItem('kbank_loan');
+                return;
+            } else if (dbUser.status === 'paid') {
                 valElem.innerText = '0 ₴';
                 valElem.className = 'text-white opacity-20';
                 iconElem.classList.add('hidden');
+                hasActiveLoan = false;
+                localStorage.removeItem('kbank_loan');
+                return;
             }
         }
+    } catch (e) { console.log("Database fetch error"); }
+
+    const localLoan = JSON.parse(localStorage.getItem('kbank_loan'));
+    if (localLoan && localLoan.status === 'pending') {
+        valElem.innerText = `${parseInt(localLoan.amount).toLocaleString()} ₴`;
+        valElem.className = 'status-pending font-bold';
+        iconElem.classList.remove('hidden');
+        hasActiveLoan = true;
+    } else {
+        valElem.innerText = '0 ₴';
+        valElem.className = 'text-white opacity-20';
+        iconElem.classList.add('hidden');
+    }
+}
 
         async function sendCreditRequest() {
             const amount = document.getElementById('loan-amount').value;
