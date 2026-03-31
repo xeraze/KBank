@@ -4,110 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KBank — Твій надійний банк</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        
-        body { 
-            background: radial-gradient(circle at top right, #1a1a1a, #000000); 
-            color: #fff; 
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            margin: 0;
-        }
-
-        .mono-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
-            border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 2rem;
-        }
-
-        #order-modal, #success-modal, #tariffs-modal { 
-            display: none; 
-            position: fixed; 
-            inset: 0; 
-            background: rgba(0,0,0,0.9); 
-            z-index: 1000; 
-            align-items: center; 
-            justify-content: center; 
-            backdrop-filter: blur(15px);
-        }
-
-        .modal-content { 
-            background: #111; 
-            border: 1px solid #333; 
-            width: 95%; 
-            max-width: 500px; 
-            padding: 2.5rem; 
-            border-radius: 2.5rem; 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        input, select, textarea { 
-            background: #1a1a1a !important; 
-            border: 1px solid #333 !important; 
-            color: white !important; 
-            width: 100%; 
-            padding: 1rem; 
-            border-radius: 1.2rem; 
-            font-size: 0.95rem; 
-            margin-top: 0.5rem; 
-            transition: all 0.2s;
-        }
-
-        input:focus, select:focus, textarea:focus { 
-            border-color: #ffffff !important; 
-            background: #222 !important;
-            outline: none; 
-        }
-        
-        label { 
-            color: #aaa; 
-            font-size: 0.75rem; 
-            font-weight: 800; 
-            text-transform: uppercase; 
-            letter-spacing: 0.05em;
-            margin-left: 0.5rem; 
-        }
-
-        .btn-primary { 
-            background: #fff; 
-            color: #000; 
-            font-weight: 900; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
-
-        .btn-primary:hover { 
-            transform: translateY(-2px);
-            box-shadow: 0 15px 30px rgba(255,255,255,0.15); 
-        }
-
-        .btn-secondary {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #fff;
-            font-weight: 700;
-            transition: all 0.3s;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        @keyframes pulse { 
-            0% { opacity: 1; } 
-            50% { opacity: 0.5; } 
-            100% { opacity: 1; } 
-        }
-        
-        .status-loading { 
-            animation: pulse 2s infinite; 
-        }
-
+        body { background: radial-gradient(circle at top right, #1a1a1a, #000000); color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; margin: 0; }
+        .mono-card { background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); border-radius: 2rem; }
+        #order-modal, #success-modal, #tariffs-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(15px); }
+        .modal-content { background: #111; border: 1px solid #333; width: 95%; max-width: 500px; padding: 2.5rem; border-radius: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        input, select, textarea { background: #1a1a1a!important; border: 1px solid #333!important; color: white!important; width: 100%; padding: 1rem; border-radius: 1.2rem; font-size: 0.95rem; margin-top: 0.5rem; transition: all 0.2s; }
+        input:focus, select:focus, textarea:focus { border-color: #ffffff!important; background: #222!important; outline: none; }
+        label { color: #aaa; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-left: 0.5rem; }
+        .btn-primary { background: #fff; color: #000; font-weight: 900; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(255,255,255,0.15); }
+        .btn-secondary { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-weight: 700; transition: all 0.3s; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .status-loading { animation: pulse 2s infinite; }
         .hidden { display: none; }
     </style>
 </head>
@@ -142,7 +56,7 @@
 
                 <div>
                     <label>Мета</label>
-                    <textarea id="loan-purpose" rows="3" placeholder="Опиши свою ціль детально..."></textarea>
+                    <textarea id="loan-purpose" rows="3" placeholder="Опиши свою ціль..."></textarea>
                 </div>
 
                 <div class="pt-6 flex flex-col gap-3">
@@ -157,42 +71,31 @@
         <div class="modal-content">
             <h3 class="text-3xl font-black mb-8 uppercase italic tracking-tighter text-center">Наші Тарифи</h3>
             <div class="space-y-4">
-                <div class="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/5 transition hover:bg-white/10">
+                <div class="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/5">
                     <div>
-                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-widest">Процентна ставка</p>
-                        <p class="font-bold text-lg">0.01% <span class="text-xs text-gray-500 font-normal">на добу</span></p>
+                        <p class="text-[10px] text-gray-500 uppercase font-black">Процентна ставка</p>
+                        <p class="font-bold text-lg">0.01% <span class="text-xs text-gray-500 font-normal italic">на добу</span></p>
                     </div>
                     <i class="fas fa-percent text-white/20 text-xl"></i>
                 </div>
 
-                <div class="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/5 transition hover:bg-white/10">
+                <div class="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/5">
                     <div>
-                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-widest">Максимальний ліміт</p>
+                        <p class="text-[10px] text-gray-500 uppercase font-black">Максимальний ліміт</p>
                         <p class="font-bold text-lg text-green-500">1,000,000 ₴</p>
                     </div>
                     <i class="fas fa-vault text-white/20 text-xl"></i>
                 </div>
 
-                <div class="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/5 transition hover:bg-white/10">
+                <div class="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/5">
                     <div>
-                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-widest">Комісія за переказ</p>
-                        <p class="font-bold text-lg">0 ₴ <span class="text-xs text-green-500 font-normal">Безкоштовно</span></p>
+                        <p class="text-[10px] text-gray-500 uppercase font-black">Комісія за переказ</p>
+                        <p class="font-bold text-lg">0 ₴</p>
                     </div>
                     <i class="fas fa-hand-holding-dollar text-white/20 text-xl"></i>
                 </div>
-
-                <div class="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/5 transition hover:bg-white/10">
-                    <div>
-                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-widest">Час розгляду</p>
-                        <p class="font-bold text-lg">від 5 хв <span class="text-xs text-gray-500 font-normal">до 48 год</span></p>
-                    </div>
-                    <i class="fas fa-clock text-white/20 text-xl"></i>
-                </div>
             </div>
-
-            <button onclick="closeModal('tariffs-modal')" class="w-full btn-primary py-5 rounded-2xl text-sm mt-8 uppercase font-black tracking-widest shadow-lg shadow-white/5">
-                Зрозуміло
-            </button>
+            <button onclick="closeModal('tariffs-modal')" class="w-full btn-primary py-5 rounded-2xl text-sm mt-8 uppercase font-black">Зрозуміло</button>
         </div>
     </div>
 
@@ -210,7 +113,7 @@
     <nav class="p-8">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <img src="LOGO_MAIN.png" alt="KBank Logo" class="w-12 h-12 rounded-2xl object-cover shadow-2xl border border-white/10">
+                <img src="LOGO_MAIN.png" alt="Logo" class="w-12 h-12 rounded-2xl object-cover border border-white/10">
                 <h1 class="text-3xl font-black italic tracking-tighter uppercase">K<span class="text-white/50">Bank</span></h1>
             </div>
             
@@ -222,12 +125,10 @@
                 <div id="user-profile" class="hidden flex items-center gap-4 bg-white/5 p-2 pr-6 rounded-3xl border border-white/5">
                     <img id="user-avatar" src="" class="w-12 h-12 rounded-2xl border border-white/10">
                     <div class="text-left">
-                        <p id="user-name" class="text-sm font-black leading-none text-white"></p>
-                        <p class="text-[10px] text-gray-500 mt-1 uppercase font-black tracking-tighter">
+                        <p id="user-name" class="text-sm font-black text-white"></p>
+                        <p class="text-[10px] text-gray-500 uppercase font-black tracking-tighter">
                             Твій Кредит: <span id="credit-value" class="text-white">0 ₴</span>
-                            <span id="pending-icon" class="hidden ml-1 text-white" title="На розгляді">
-                                <i class="fas fa-spinner fa-spin"></i>
-                            </span>
+                            <span id="pending-icon" class="hidden ml-1 text-white"><i class="fas fa-spinner fa-spin text-[8px]"></i></span>
                         </p>
                     </div>
                 </div>
@@ -238,29 +139,20 @@
     <main class="max-w-6xl mx-auto px-6 py-16">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
             <div class="text-center lg:text-left">
-                <h2 class="text-7xl font-black leading-[0.9] mb-8 tracking-tighter uppercase italic">
-                    ГРОШІ <br><span class="text-gray-500">ТУТ І ЗАРАЗ.</span>
-                </h2>
-                <p class="text-gray-400 text-lg mb-12 max-w-md font-medium mx-auto lg:mx-0 leading-relaxed">
-                    Найшвидші кредити для гравців. Отримуй кошти на розвиток бізнесу чи нове авто вже сьогодні!
-                </p>
-                
+                <h2 class="text-7xl font-black leading-[0.9] mb-8 tracking-tighter uppercase italic">ГРОШІ <br><span class="text-gray-500">ТУТ І ЗАРАЗ.</span></h2>
+                <p class="text-gray-400 text-lg mb-12 max-w-md font-medium mx-auto lg:mx-0">Найшвидші кредити для гравців. Отримуй кошти на розвиток бізнесу чи нове авто вже сьогодні!</p>
                 <div class="flex flex-wrap gap-5 justify-center lg:justify-start">
-                    <button onclick="openModal()" class="btn-primary px-12 py-6 rounded-[2rem] text-sm uppercase tracking-tighter">Оформити кредит</button>
-                    <button onclick="openTariffs()" class="btn-secondary px-12 py-6 rounded-[2rem] text-sm uppercase tracking-tighter">Тарифи банку</button>
+                    <button onclick="openModal()" class="btn-primary px-12 py-6 rounded-[2rem] text-sm uppercase">Оформити кредит</button>
+                    <button onclick="openTariffs()" class="btn-secondary px-12 py-6 rounded-[2rem] text-sm uppercase">Тарифи банку</button>
                 </div>
             </div>
-
             <div class="relative hidden lg:block">
-                <div class="mono-card p-10 aspect-video flex flex-col justify-between shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative z-10 overflow-hidden">
+                <div class="mono-card p-10 aspect-video flex flex-col justify-between shadow-2xl relative z-10 overflow-hidden text-white/90">
                     <div class="flex justify-between items-start">
-                        <img src="LOGO_MAIN.png" class="w-16 h-16 rounded-2xl opacity-90">
-                        <i class="fas fa-wifi rotate-90 text-white/10 text-2xl"></i>
+                        <img src="LOGO_MAIN.png" class="w-16 h-16 rounded-2xl">
+                        <i class="fas fa-wifi rotate-90 text-2xl opacity-20"></i>
                     </div>
-                    <div>
-                        <p class="text-[10px] text-white/20 uppercase tracking-[0.3em] font-black mb-2">KBank Member</p>
-                        <p class="text-3xl font-bold tracking-[0.2em] text-white/90">•••• •••• •••• 2026</p>
-                    </div>
+                    <p class="text-3xl font-bold tracking-[0.2em]">•••• •••• •••• 2026</p>
                     <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
                 </div>
             </div>
@@ -271,7 +163,7 @@
         const CLIENT_ID = '1488509930485841961';
         const WEBHOOK_URL = 'https://discord.com/api/webhooks/1488505884756938793/nx9kc5t7JlQAqN1cfIYraiTJqbOVaz5F-n1qZh-u-DPiW3VJ_4qE7BYCK_UKta-mDtjt';
         const JSON_URL = 'https://raw.githubusercontent.com/xeraze/KBank/main/database.json';
-
+        
         let hasActiveLoan = false;
 
         function openTariffs() { document.getElementById('tariffs-modal').style.display = 'flex'; }
@@ -284,23 +176,21 @@
         }
 
         document.getElementById('login-btn').onclick = () => {
-            const redirectUri = encodeURIComponent(window.location.href.split('#')[0]);
-            window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${redirectUri}&response_type=token&scope=identify`;
+            const rUri = encodeURIComponent(window.location.href.split('#')[0]);
+            window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${rUri}&response_type=token&scope=identify`;
         };
 
         window.onload = async () => {
-            const fragment = new URLSearchParams(window.location.hash.slice(1));
-            const accessToken = fragment.get('access_token');
-            
-            if (accessToken) {
+            const frag = new URLSearchParams(window.location.hash.slice(1));
+            const token = frag.get('access_token');
+            if (token) {
                 try {
                     const res = await fetch('https://discord.com/api/users/@me', { 
-                        headers: { Authorization: `Bearer ${accessToken}` } 
+                        headers: { Authorization: `Bearer ${token}` } 
                     });
-                    const user = await res.json();
-                    localStorage.setItem('kbank_user', JSON.stringify(user));
+                    localStorage.setItem('kbank_user', JSON.stringify(await res.json()));
                     window.history.replaceState({}, document.title, window.location.pathname);
-                } catch (e) { console.error("Auth error:", e); }
+                } catch (e) { console.error(e); }
             }
             updateUI();
         };
@@ -313,35 +203,32 @@
             document.getElementById('user-profile').classList.remove('hidden');
             document.getElementById('user-name').innerText = user.username;
             document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
-
+            
             const valElem = document.getElementById('credit-value');
             const iconElem = document.getElementById('pending-icon');
             hasActiveLoan = false;
 
             try {
-                const response = await fetch(JSON_URL + '?t=' + Date.now());
-                const db = await response.json();
-                
+                const res = await fetch(JSON_URL + '?t=' + Date.now());
+                const db = await res.json();
                 const dbUser = db.users.find(u => String(u.id) === String(user.id));
-
+                
                 if (dbUser) {
                     if (dbUser.status === 'approved') {
                         valElem.innerText = `${dbUser.amount.toLocaleString()} ₴`;
                         valElem.className = 'text-white font-black opacity-100';
                         iconElem.classList.add('hidden');
                         hasActiveLoan = true;
-                        localStorage.removeItem('kbank_loan'); 
+                        localStorage.removeItem('kbank_loan');
                         return;
-                    } 
-                    else if (dbUser.status === 'paid') {
+                    } else if (dbUser.status === 'paid') {
                         valElem.innerText = '0 ₴';
                         valElem.className = 'text-white font-bold opacity-100';
                         iconElem.classList.add('hidden');
                         hasActiveLoan = false;
                         localStorage.removeItem('kbank_loan');
                         return;
-                    }
-                    else if (dbUser.status === 'pending') {
+                    } else if (dbUser.status === 'pending') {
                         valElem.innerText = `${dbUser.amount.toLocaleString()} ₴`;
                         valElem.className = 'text-white opacity-40 italic status-loading';
                         iconElem.classList.remove('hidden');
@@ -349,11 +236,11 @@
                         return;
                     }
                 }
-            } catch (e) { console.log("Database fetch skip or error."); }
+            } catch (e) { console.log("DB sync..."); }
 
-            const localLoan = JSON.parse(localStorage.getItem('kbank_loan'));
-            if (localLoan && localLoan.status === 'pending') {
-                valElem.innerText = `${parseInt(localLoan.amount).toLocaleString()} ₴`;
+            const local = JSON.parse(localStorage.getItem('kbank_loan'));
+            if (local && local.status === 'pending') {
+                valElem.innerText = `${parseInt(local.amount).toLocaleString()} ₴`;
                 valElem.className = 'text-white opacity-40 italic status-loading';
                 iconElem.classList.remove('hidden');
                 hasActiveLoan = true;
@@ -371,16 +258,14 @@
             const purpose = document.getElementById('loan-purpose').value;
             const user = JSON.parse(localStorage.getItem('kbank_user'));
 
-            if (!amount || !nick || !purpose) {
-                return alert('Будь ласка, заповніть усі поля!');
-            }
+            if (!amount || !nick || !purpose) return alert('Заповніть усі поля!');
 
             const payload = {
                 embeds: [{
                     title: "НОВА ЗАЯВКА НА КРЕДИТ",
                     color: 0xffffff,
                     fields: [
-                        { name: "Клієнт", value: `<@${user.id}> (${user.username})`, inline: false },
+                        { name: "Клієнт", value: `<@${user.id}> (${user.username})` },
                         { name: "Сума", value: `**${amount} ₴**`, inline: true },
                         { name: "Термін", value: `**${term} місяців**`, inline: true },
                         { name: "Roblox Nick", value: `\`${nick}\``, inline: true },
@@ -397,14 +282,11 @@
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify(payload) 
                 });
-
                 localStorage.setItem('kbank_loan', JSON.stringify({ amount, status: 'pending' }));
                 closeModal('order-modal');
                 document.getElementById('success-modal').style.display = 'flex';
                 updateUI();
-            } catch (e) {
-                alert('Помилка відправки. Спробуйте ще раз.');
-            }
+            } catch (e) { alert('Помилка відправки.'); }
         }
     </script>
 </body>
