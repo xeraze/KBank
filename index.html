@@ -222,21 +222,42 @@
 
         async function sendCreditRequest() {
             const amount = document.getElementById('loan-amount').value;
+            const term = document.getElementById('loan-term').value;
             const nick = document.getElementById('roblox-nick').value;
+            const purpose = document.getElementById('loan-purpose').value;
             const user = JSON.parse(localStorage.getItem('kbank_user'));
-            if (!amount || !nick) return alert('Заповніть поля!');
 
-            const payload = { embeds: [{ title: "НОВА ЗАЯВКА", color: 0xffffff, fields: [
-                { name: "Клієнт", value: `<@${user.id}>` },
-                { name: "Сума", value: `${amount} ₴`, inline: true },
-                { name: "Roblox", value: nick, inline: true }
-            ] }] };
+            if (!amount || !nick || !purpose) return alert('Будь ласка, заповніть усі поля!');
 
-            await fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            localStorage.setItem('kbank_loan', JSON.stringify({ amount, status: 'pending' }));
-            closeModal('order-modal');
-            openModal('success-modal');
-            updateUI();
+            const payload = {
+                embeds: [{
+                    title: "НОВА ЗАЯВКА НА КРЕДИТ",
+                    color: 0xffffff,
+                    fields: [
+                        { name: "Клієнт", value: `<@${user.id}> (${user.username})` },
+                        { name: "Сума", value: `${amount} ₴`, inline: true },
+                        { name: "Термін", value: `${term} місяців`, inline: true },
+                        { name: "Roblox Nick", value: nick, inline: true },
+                        { name: "Мета", value: `\`\`\`${purpose}\`\`\`` }
+                    ],
+                    footer: { text: `ID: ${user.id} • ${new Date().toLocaleString('uk-UA')}` }
+                }]
+            };
+
+            try {
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                localStorage.setItem('kbank_loan', JSON.stringify({ amount, status: 'pending' }));
+                closeModal('order-modal');
+                openModal('success-modal');
+                updateUI();
+            } catch (e) {
+                alert('Помилка відправки. Перевірте з’єднання.');
+            }
         }
 
         document.getElementById('login-btn').onclick = () => {
