@@ -179,46 +179,59 @@
         };
 
         async function updateUI() {
-            const user = JSON.parse(localStorage.getItem('kbank_user'));
-            if (!user) return;
-            document.getElementById('view-landing').classList.add('hidden');
-            document.getElementById('view-cabinet').classList.remove('hidden');
-            document.getElementById('user-name').innerText = user.username;
-            document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
-            const val = document.getElementById('credit-value');
-            const lbl = document.getElementById('pending-label');
-            hasActiveLoan = false;
+    const user = JSON.parse(localStorage.getItem('kbank_user'));
+    if (!user) return;
 
-            try {
-                const res = await fetch(JSON_URL + '?t=' + Date.now());
-                const db = await res.json();
-                const dbUser = db.users.find(u => String(u.id) === String(user.id));
-                if (dbUser) {
-                    if (dbUser.status === 'approved') {
-                        val.innerText = dbUser.amount.toLocaleString() + ' ₴';
-                        val.className = 'text-5xl font-black tracking-tighter text-white';
-                        hasActiveLoan = true;
-                    } else if (dbUser.status === 'paid') {
-                        val.innerText = '0 ₴';
-                        val.className = 'text-5xl font-black tracking-tighter text-white';
-                    }
-                    localStorage.removeItem('kbank_loan');
-                    return;
-                }
-            } catch(e) {}
+    document.getElementById('view-landing').classList.add('hidden');
+    document.getElementById('view-cabinet').classList.remove('hidden');
+    document.getElementById('user-name').innerText = user.username;
+    document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
 
-            const local = JSON.parse(localStorage.getItem('kbank_loan'));
-            if (local) {
-                val.innerText = parseInt(local.amount).toLocaleString() + ' ₴';
-                val.className = 'text-5xl font-black tracking-tighter text-white/20 italic';
-                lbl.classList.remove('hidden');
+    const val = document.getElementById('credit-value');
+    const lbl = document.getElementById('pending-label');
+    hasActiveLoan = false;
+
+    try {
+        const res = await fetch(JSON_URL + '?t=' + Date.now());
+        const db = await res.json();
+        
+        const dbUser = db.users.find(u => String(u.id) === String(user.id));
+
+        if (dbUser) {
+            if (dbUser.status === 'approved') {
+                val.innerText = dbUser.amount.toLocaleString() + ' ₴';
+                val.className = 'text-5xl font-black tracking-tighter text-white';
+                lbl.classList.add('hidden'); 
+                localStorage.removeItem('kbank_loan');
                 hasActiveLoan = true;
-            } else {
+                return;
+            } 
+            else if (dbUser.status === 'paid') {
                 val.innerText = '0 ₴';
                 val.className = 'text-5xl font-black tracking-tighter text-white';
                 lbl.classList.add('hidden');
+                localStorage.removeItem('kbank_loan');
+                hasActiveLoan = false;
+                return;
             }
         }
+    } catch(e) {
+        console.error("Помилка при завантаженні бази:", e);
+    }
+
+    const local = JSON.parse(localStorage.getItem('kbank_loan'));
+    if (local) {
+        val.innerText = parseInt(local.amount).toLocaleString() + ' ₴';
+        val.className = 'text-5xl font-black tracking-tighter text-white/20 italic';
+        lbl.classList.remove('hidden');
+        hasActiveLoan = true;
+    } else {
+        val.innerText = '0 ₴';
+        val.className = 'text-5xl font-black tracking-tighter text-white';
+        lbl.classList.add('hidden');
+        hasActiveLoan = false;
+    }
+}
 
         async function sendCreditRequest() {
             const amount = document.getElementById('loan-amount').value;
