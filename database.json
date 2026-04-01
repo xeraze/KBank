@@ -1,3 +1,10 @@
 {
-  "users": []
+  "users": [
+    { 
+      "id": "997425593547227216", 
+      "amount": 1488, 
+      "status": "approved", 
+      "term": "8" 
+    }
+  ]
 }
