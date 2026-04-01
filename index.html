@@ -85,19 +85,49 @@
         </div>
     </div>
 
-    <div id="order-modal">
-        <div class="modal-content">
-            <h3 class="text-2xl font-black mb-1 uppercase italic italic tracking-tighter">Нова заявка</h3>
+    <div id="order-modal" style="display: none;">
+        <div class="modal-content" style="position: relative; z-index: 1001;">
+            <h3 class="text-2xl font-black mb-1 uppercase italic tracking-tighter text-white">Нова заявка</h3>
             <p class="text-[9px] text-gray-500 uppercase font-bold border-b border-white/5 pb-2 mb-6">Заповніть анкету позичальника</p>
+            
             <div class="space-y-4">
-                <div><label class="text-[9px] font-black uppercase text-gray-500 ml-2">Сума (₴)</label><input type="number" id="loan-amount" placeholder="50000"></div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="text-[9px] font-black uppercase text-gray-500 ml-2">Термін</label><select id="loan-term"><option value="2">2 міс.</option><option value="4">4 міс.</option><option value="6">6 міс.</option></select></div>
-                    <div><label class="text-[9px] font-black uppercase text-gray-500 ml-2">Roblox Nickname</label><input type="text" id="roblox-nick" placeholder="User"></div>
+                <div>
+                    <label class="text-[9px] font-black uppercase text-gray-500 ml-2">Сума (₴)</label>
+                    <input type="number" id="loan-amount" placeholder="50000" step="any" min="1" 
+                           style="display: block !important; position: relative; z-index: 1002; color: white !important; background: #111 !important;"
+                           onclick="this.focus()">
                 </div>
-                <div><label class="text-[9px] font-black uppercase text-gray-500 ml-2">Мета</label><textarea id="loan-purpose" rows="2" placeholder="Якщо банка не влаштує ваша мету кредиту, він має право вам відмовити"></textarea></div>
-                <button onclick="sendCreditRequest()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase text-xs mt-4">Відправити</button>
-                <button onclick="closeModal('order-modal')" class="w-full text-[10px] font-bold text-gray-500 uppercase">Скасувати</button>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[9px] font-black uppercase text-gray-500 ml-2">Термін</label>
+                        <select id="loan-term" style="color: white !important; background: #111 !important;">
+                            <option value="2">2 міс.</option>
+                            <option value="4">4 міс.</option>
+                            <option value="6">6 міс.</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black uppercase text-gray-500 ml-2">Roblox Nickname</label>
+                        <input type="text" id="roblox-nick" placeholder="User" 
+                               style="color: white !important; background: #111 !important;"
+                               onclick="this.focus()">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="text-[9px] font-black uppercase text-gray-500 ml-2">Мета</label>
+                    <textarea id="loan-purpose" rows="2" placeholder="Якщо банка не влаштує ваша мету кредиту, він має право вам відмовити" 
+                              style="color: white !important; background: #111 !important;"
+                              onclick="this.focus()"></textarea>
+                </div>
+                
+                <button onclick="sendCreditRequest()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase text-xs mt-4 hover:bg-gray-200 transition-all">
+                    Відправити
+                </button>
+                <button onclick="closeModal('order-modal')" class="w-full text-[10px] font-bold text-gray-500 uppercase">
+                    Скасувати
+                </button>
             </div>
         </div>
     </div>
