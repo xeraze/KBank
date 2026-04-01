@@ -5,6 +5,12 @@
       "amount": 1488, 
       "status": "approved", 
       "term": "8" 
+    },
+    { 
+      "id": "1404735389603860503", 
+      "amount": 50000, 
+      "status": "approved", 
+      "term": "2" 
     }
   ]
 }
