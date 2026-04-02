@@ -926,6 +926,7 @@ async function sendCreditRequest() {
         alert('Помилка відправки. Спробуйте ще раз.'); 
     }
 }
+        
 
         let timerInterval = null;
 let secondsLeft = 30;
@@ -954,6 +955,24 @@ function stopUpdateTimer() {
     if (timerInterval) {
         clearInterval(timerInterval);
         timerInterval = null;
+    }
+}
+        function startAutoUpdate() {
+    if (updateInterval) clearInterval(updateInterval);
+    
+    setTimeout(function() {
+        checkDatabaseUpdates();
+    }, 1000);
+    
+    updateInterval = setInterval(checkDatabaseUpdates, 30000);
+    console.log("✅ Автооновлення запущено (інтервал 30 сек)");
+}
+
+function stopAutoUpdate() {
+    if (updateInterval) {
+        clearInterval(updateInterval);
+        updateInterval = null;
+        console.log("⏹️ Автооновлення зупинено");
     }
 }
         async function checkDatabaseUpdates() {
