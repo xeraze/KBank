@@ -211,3 +211,37 @@
 .currency-card .k-card-back {
     background: #0f2b4f !important;
 }
+
+#card-box {
+    transition: transform 0.2s ease-out;
+}
+
+@keyframes cardSlideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(30px) rotate(2deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) rotate(0);
+    }
+}
+
+@keyframes cardSlideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-30px) rotate(-2deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) rotate(0);
+    }
+}
+
+.card-animate-left {
+    animation: cardSlideInLeft 0.3s ease-out forwards;
+}
+
+.card-animate-right {
+    animation: cardSlideInRight 0.3s ease-out forwards;
+}
