@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>KredaBank — цифровий комфорт</title>
+    <title>KredaBank — твій надійний банк</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
@@ -173,10 +173,10 @@
             <div class="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500 text-3xl shadow-lg shadow-green-500/5">
                 <i class="fas fa-check-double animate-bounce"></i>
             </div>
-            <h3 class="text-2xl font-black uppercase italic mb-2 tracking-tighter text-white">Заявка прийнята</h3>
+            <h3 class="text-2xl font-black uppercase italic mb-2 tracking-tighter text-white">Успішно!</h3>
             <div class="space-y-3 mb-8">
                 <p class="text-[11px] text-gray-400 leading-relaxed px-2">
-                    Ваша заявка на кредит успішно надіслана до <span class="text-white font-bold italic uppercase">KREDABank</span>.
+                    Ваша заявка на кредит успішно надіслана до <span class="text-white font-bold italic uppercase">KredaBank</span>.
                 </p>
                 <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
                     <p class="text-[9px] text-gray-500 uppercase font-black mb-1 text-left">Регламент розгляду</p>
@@ -1013,7 +1013,7 @@ async function requestNewCard(cardType) {
     var payload = {
         embeds: [{
             title: "НОВА ЗАЯВКА НА КАРТКУ",
-            color: 0x22c55e,
+            color: 0xffffff,
             fields: [
                 { name: "Клієнт", value: '<@' + user.id + '> (' + user.username + ')', inline: false },
                 { name: "Тип картки", value: typeNames[cardType] || cardType, inline: true },
