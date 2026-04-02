@@ -64,12 +64,12 @@
         <div id="pending-label" class="hidden text-[10px] text-white/30 italic mt-3 status-pulse font-bold uppercase">Очікує розгляду...</div>
     </div>
 
-    <div class="perspective-1000 flex justify-center mb-10" id="card-box">
-    <div class="k-card relative w-full max-w-[320px] aspect-[1.58/1] rounded-[22px] p-6 flex flex-col justify-between overflow-hidden shadow-2xl transition-transform duration-200" 
-         style="background: rgba(255,255,255,0.03); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1);">
-        
+    <div class="k-card">
+  <div class="k-card-inner">
+
+    <div class="k-card-front relative w-full h-full rounded-[22px] p-6 flex flex-col justify-between overflow-hidden">
         <div class="absolute -top-1/4 -left-1/4 w-full h-full bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
-        
+
         <div class="flex justify-between items-start relative z-10">
             <img src="LOGO_MAIN.png" class="w-10 h-10 filter brightness-200 opacity-80">
             <i class="fas fa-wifi rotate-90 text-white/20 text-xl"></i>
@@ -77,16 +77,35 @@
 
         <div class="relative z-10">
             <p class="text-white/80 font-medium tracking-[0.15em] text-xl mb-1 whitespace-nowrap">
-                <span class="opacity-40">•••• •••• ••••</span> <span id="card_num_display">0000</span>
+                <span class="opacity-40">•••• •••• ••••</span> 
+                <span id="card_num_display">0000</span>
             </p>
             <div class="flex justify-between items-end">
-                <div>
-                    <p class="text-[7px] text-white/20 font-black uppercase tracking-[0.2em]">KedraBank Card</p>
-                    </div>
+                <p class="text-[7px] text-white/20 font-black uppercase tracking-[0.2em]">KedraBank Card</p>
                 <p class="text-[10px] text-white/30 font-mono">2026</p>
             </div>
         </div>
     </div>
+
+    <div class="k-card-back rounded-[22px] p-6 flex flex-col justify-between">
+        <div class="w-full h-10 bg-black/80 rounded-md mt-2"></div>
+
+        <div class="flex justify-between items-center mt-6">
+            <div class="bg-white text-black px-3 py-1 rounded text-xs italic w-2/3">
+                USER NAME
+            </div>
+            <div class="bg-white text-black px-2 py-1 rounded text-xs font-bold">
+                123
+            </div>
+        </div>
+
+        <p class="text-[8px] text-white/30 mt-4">
+            KedraBank Secure Card
+        </p>
+    </div>
+
+  </div>
+</div>
 </div>
 
     <div class="grid grid-cols-2 gap-4 mb-10 relative z-30">
