@@ -1,38 +1,51 @@
 {
   "users": [
-    { 
-      "id": "997425593547227216", 
-      "amount": 1488, 
-      "status": "paid", 
+    {
+      "id": "997425593547227216",
+      "amount": 1488,
+      "status": "paid",
       "term": "8",
       "cards": []
     },
-    { 
-      "id": "1404735389603860503", 
-      "amount": 50000, 
-      "status": "paid", 
+    {
+      "id": "1404735389603860503",
+      "amount": 50000,
+      "status": "paid",
       "term": "2",
       "cards": [
-        {"type": "credit", "status": "active"},
-        {"type": "salary", "status": "active"}
+        {
+          "type": "credit",
+          "status": "active"
+        },
+        {
+          "type": "salary",
+          "status": "active"
+        }
       ]
     },
-    { 
-      "id": "1278807991377989697", 
-      "amount": 0, 
-      "status": "paid", 
+    {
+      "id": "1278807991377989697",
+      "amount": 0,
+      "status": "paid",
       "term": "2",
       "cards": [
-        {"type": "credit", "status": "active"}
+        {
+          "type": "credit",
+          "status": "active"
+        }
       ]
     },
-    { 
-      "id": "1342502184109211769", 
-      "amount": 0, 
-      "status": "paid", 
+    {
+      "id": "1342502184109211769",
+      "amount": 0,
+      "status": "paid",
       "term": "2",
       "cards": [
-        {"type": "credit", "status": "verification", "meetLink": "https://meet.google.com/sbi-xuks-jum"}
+        {
+          "type": "credit",
+          "status": "verification",
+          "meetLink": "https://meet.google.com/sbi-xuks-jum"
+        }
       ]
     }
   ]
