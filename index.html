@@ -2,38 +2,189 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KedraBank</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>KedraBank — цифровий комфорт</title>
+    <!-- Tailwind + Fonts + Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" type="image/png" href="LOGO_MAIN.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #1a1a1a, #000000);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* кастомні карткові стилі */
+        .perspective-1000 { perspective: 1000px; }
+
+        .ops-stub {
+            border: 2px dashed rgba(255,255,255,0.03);
+            border-radius: 2.5rem;
+            padding: 3rem 1rem;
+            text-align: center;
+        }
+
+        /* модальні вікна */
+        #order-modal, #success-modal, #tariffs-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        .modal-content {
+            background: #0a0a0a;
+            border: 1px solid #1f1f1f;
+            width: 90%;
+            max-width: 450px;
+            padding: 2rem 1.8rem;
+            border-radius: 2rem;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.6);
+        }
+
+        input, select, textarea {
+            background: #111 !important;
+            border: 1px solid #2a2a2a !important;
+            color: #ffffff !important;
+            width: 100%;
+            padding: 12px 16px !important;
+            border-radius: 1.2rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #ffffff30 !important;
+            background: #161616 !important;
+        }
+
+        /* КАРТА 3D FLIP (виправлено) */
+        #card-box {
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .k-card {
+            width: 100%;
+            aspect-ratio: 1.58 / 1;
+            perspective: 1000px;
+        }
+
+        .k-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+            transform-style: preserve-3d;
+            border-radius: 22px;
+        }
+
+        #card-box:hover .k-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .k-card-front, .k-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 24px;
+            background: rgba(20, 20, 30, 0.65);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.5);
+        }
+
+        .k-card-front {
+            background: linear-gradient(135deg, rgba(30,30,40,0.9), rgba(10,10,15,0.95));
+        }
+
+        .k-card-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(135deg, #0e0e12, #030303);
+        }
+
+        textarea { resize: none; }
+        input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.2) !important; }
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(255,255,255,0.6)' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 16px center !important;
+            padding-right: 40px !important;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .status-pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .hidden { display: none !important; }
+
+        #profile-menu {
+            box-shadow: 0 20px 35px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        button:active { transform: scale(0.97); transition: 0.05s; }
+        .transition-fast { transition: all 0.2s ease; }
+    </style>
 </head>
 <body>
 
+    <!-- LANDING VIEW -->
     <div id="view-landing" class="min-h-screen flex flex-col justify-center items-center p-6 text-center relative overflow-hidden">
         <div class="absolute top-6 right-6 z-50">
-            <div id="user-profile-top" class="hidden flex flex-col items-end">
+            <div id="user-profile-top" class="hidden flex-col items-end">
                 <button onclick="toggleProfileMenu()" class="flex items-center gap-3 bg-white/5 border border-white/10 p-2 pr-4 rounded-2xl hover:bg-white/10 transition-all">
-                    <img id="top-avatar" class="w-8 h-8 rounded-xl border border-white/10">
+                    <img id="top-avatar" class="w-8 h-8 rounded-xl border border-white/10 object-cover">
                     <div class="text-right">
                         <p id="top-username" class="text-[10px] font-black uppercase italic leading-none mb-1"></p>
                         <p id="top-balance" class="text-[8px] text-green-500 font-bold uppercase tracking-widest">0 ₴</p>
                     </div>
                 </button>
                 <div id="profile-menu" class="hidden mt-2 w-48 bg-[#0f0f0f] border border-white/5 rounded-2xl p-2 shadow-2xl backdrop-blur-xl">
-                    <button onclick="showCabinet()" class="w-full text-left p-3 hover:bg-white/5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center gap-3">
+                    <button onclick="showCabinet()" class="w-full text-left p-3 hover:bg-white/5 rounded-xl text-[10px] font-black uppercase flex items-center gap-3">
                         <i class="fas fa-user-circle text-gray-500"></i> Особистий кабінет
                     </button>
                     <div class="h-px bg-white/5 my-1"></div>
-                    <button onclick="logout()" class="w-full text-left p-3 hover:bg-red-500/10 rounded-xl text-[10px] font-black uppercase text-red-500 transition-all flex items-center gap-3">
+                    <button onclick="logout()" class="w-full text-left p-3 hover:bg-red-500/10 rounded-xl text-[10px] font-black uppercase text-red-500 flex items-center gap-3">
                         <i class="fas fa-sign-out-alt"></i> Вийти
                     </button>
                 </div>
             </div>
         </div>
 
-        <img src="LOGO_MAIN.png" class="w-24 h-24 mb-6 shadow-2xl relative z-10"> <h1 class="text-5xl md:text-7xl font-black italic uppercase tracking-tighter mb-4 relative z-10 leading-none">
+        <img src="LOGO_MAIN.png" class="w-24 h-24 mb-6 shadow-2xl relative z-10" alt="KedraBank logo">
+        <h1 class="text-5xl md:text-7xl font-black italic uppercase tracking-tighter mb-4 relative z-10 leading-none">
             KEDRA<span class="text-white/20">BANK</span>
         </h1>
         <p class="text-gray-500 text-[10px] font-black uppercase tracking-[0.4em] mb-12 italic relative z-10">
@@ -45,207 +196,189 @@
         </button>
     </div>
 
-   <div id="view-cabinet" class="hidden min-h-screen max-w-md mx-auto p-4 pt-10">
-    <div class="flex justify-between items-center mb-10 relative z-30">
-        <button onclick="showLanding()" class="text-white/20 hover:text-white flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all">
-            <i class="fas fa-arrow-left"></i> На головну
-        </button>
-        <div class="flex items-center gap-3">
-            <div class="text-right leading-none">
-                <p id="user-name" class="font-black italic uppercase text-sm"></p>
+    <!-- CABINET VIEW (особистий кабінет) -->
+    <div id="view-cabinet" class="hidden min-h-screen max-w-md mx-auto p-4 pt-10 pb-20">
+        <div class="flex justify-between items-center mb-10 relative z-30">
+            <button onclick="showLanding()" class="text-white/20 hover:text-white flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all">
+                <i class="fas fa-arrow-left"></i> На головну
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="text-right leading-none">
+                    <p id="user-name" class="font-black italic uppercase text-sm"></p>
                 </div>
-            <img id="user-avatar" class="w-10 h-10 rounded-xl border border-white/5 shadow-lg">
+                <img id="user-avatar" class="w-10 h-10 rounded-xl border border-white/5 shadow-lg object-cover">
+            </div>
+        </div>
+
+        <div class="text-center mb-10 relative z-30">
+            <p class="text-[9px] text-gray-500 font-black uppercase mb-1 tracking-[0.2em]">Поточний кредит</p>
+            <h2 id="credit-value" class="text-5xl font-black tracking-tighter">0 ₴</h2>
+            <div id="pending-label" class="hidden text-[10px] text-white/30 italic mt-3 status-pulse font-bold uppercase">Очікує розгляду...</div>
+        </div>
+
+        <!-- КАРТКА З FIX: обгортка #card-box для 3D flip -->
+        <div id="card-box">
+            <div class="k-card">
+                <div class="k-card-inner">
+                    <!-- ЛИЦЬОВИЙ БІК -->
+                    <div class="k-card-front">
+                        <div class="card-content p-5 flex flex-col justify-between h-full">
+                            <div class="flex justify-between items-start">
+                                <img src="LOGO_MAIN.png" class="w-9 h-9 opacity-80" alt="logo">
+                                <i class="fas fa-wifi rotate-90 text-white/20 text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-white/80 tracking-[0.15em] text-xl mb-1">
+                                    <span class="opacity-40">•••• •••• ••••</span> 
+                                    <span id="card_num_display">0000</span>
+                                </p>
+                                <div class="flex justify-between items-end">
+                                    <p class="text-[8px] text-white/20 uppercase font-bold">KedraBank</p>
+                                    <p class="text-[10px] text-white/30">2026</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ЗВОРОТНИЙ БІК -->
+                    <div class="k-card-back">
+                        <div class="p-5 flex flex-col justify-between h-full">
+                            <div class="w-full h-9 bg-black/70 rounded-md mt-2"></div>
+                            <div class="flex justify-between items-center mt-6">
+                                <div class="bg-white/90 text-black px-3 py-1.5 rounded-lg text-[11px] font-bold w-2/3 tracking-wide" id="card-username">
+                                    USER NAME
+                                </div>
+                                <div id="card-cvc" class="bg-white text-black px-2 py-1 rounded-md text-xs font-mono font-bold">
+                                    123
+                                </div>
+                            </div>
+                            <p class="text-[7px] text-white/20 text-right mt-3">NFC • contactless</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mt-8 relative z-30">
+            <button onclick="openOrder()" class="bg-white text-black py-4 rounded-2xl font-black uppercase text-[11px] shadow-xl active:scale-95 transition-all">Оформити</button>
+            <button onclick="openModal('tariffs-modal')" class="bg-white/5 border border-white/10 py-4 rounded-2xl font-black uppercase text-[11px] active:scale-95 transition-all hover:bg-white/10">Тарифи</button>
+        </div>
+
+        <p class="text-[10px] text-gray-600 font-black uppercase mb-4 ml-2 mt-8 relative z-30">Останні операції</p>
+        <div class="ops-stub bg-white/[0.02] border border-dashed border-white/5 rounded-3xl p-8 flex items-center justify-center text-center relative z-30">
+            <p class="text-[9px] text-white/10 font-black uppercase italic tracking-[0.3em]">Тут поки що порожньо..</p>
         </div>
     </div>
 
-    <div class="text-center mb-10 relative z-30">
-        <p class="text-[9px] text-gray-500 font-black uppercase mb-1 tracking-[0.2em]">Поточний кредит</p>
-        <h2 id="credit-value" class="text-5xl font-black tracking-tighter">0 ₴</h2>
-        <div id="pending-label" class="hidden text-[10px] text-white/30 italic mt-3 status-pulse font-bold uppercase">Очікує розгляду...</div>
-    </div>
-
-    <div class="k-card">
-  <div class="k-card-inner">
-
-    <div class="k-card-front">
-        <div class="card-content p-6 flex flex-col justify-between h-full">
-
-            <div class="flex justify-between items-start">
-                <img src="LOGO_MAIN.png" class="w-10 h-10 opacity-80">
-                <i class="fas fa-wifi rotate-90 text-white/20 text-xl"></i>
-            </div>
-
-            <div>
-                <p class="text-white/80 tracking-[0.15em] text-xl mb-1">
-                    <span class="opacity-40">•••• •••• ••••</span> 
-                    <span id="card_num_display">0000</span>
-                </p>
-
-                <div class="flex justify-between items-end">
-                    <p class="text-[8px] text-white/20 uppercase">KedraBank</p>
-                    <p class="text-[10px] text-white/30">2026</p>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <div class="k-card-back">
-        <div class="p-6 flex flex-col justify-between h-full">
-
-            <div class="w-full h-10 bg-black/80 rounded"></div>
-
-            <div class="flex justify-between items-center mt-6">
-                <div class="bg-white text-black px-3 py-1 rounded text-xs w-2/3">
-                    USER NAME
-                </div>
-
-                <div id="card-cvc" class="bg-white text-black px-2 py-1 rounded text-xs font-bold">
-                    123
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-  </div>
-</div>
-  </div>
-</div>
-    </div>
-</div>
-
-    <div class="grid grid-cols-2 gap-4 mb-10 relative z-30">
-        <button onclick="openOrder()" class="bg-white text-black py-4 rounded-2xl font-black uppercase text-[11px] shadow-xl active:scale-95 transition-all">Оформити</button>
-        <button onclick="openModal('tariffs-modal')" class="bg-white/5 border border-white/10 py-4 rounded-2xl font-black uppercase text-[11px] active:scale-95 transition-all text-white hover:bg-white/10">Тарифи</button>
-    </div>
-
-    <p class="text-[10px] text-gray-600 font-black uppercase mb-4 ml-2 relative z-30">Останні операції</p>
-    <div class="ops-stub bg-white/[0.02] border border-dashed border-white/5 rounded-3xl p-8 flex items-center justify-center text-center relative z-30">
-        <p class="text-[9px] text-white/10 font-black uppercase italic tracking-[0.3em]">Тут поки що порожньо..</p>
-    </div>
-</div>
-
+    <!-- МОДАЛКА ЗАЯВКИ -->
     <div id="order-modal">
-    <div class="modal-content shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10">
-        <h3 class="text-2xl font-black mb-1 uppercase italic tracking-tighter text-white text-left">Нова заявка</h3>
-        <p class="text-[9px] text-gray-500 uppercase font-bold border-b border-white/5 pb-2 mb-6 text-left">Заповніть анкету позичальника</p>
-        
-        <div class="space-y-4 text-left">
-            <div>
-                <label class="text-[9px] font-black uppercase text-gray-500 ml-2">Сума кредиту (₴)</label>
-                <input type="text" id="loan-amount" placeholder="50000" 
-                    oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(this.value > 1000000) this.value = 1000000;" 
-                    inputmode="numeric">
-            </div>
+        <div class="modal-content shadow-2xl border border-white/10">
+            <h3 class="text-2xl font-black mb-1 uppercase italic tracking-tighter text-white text-left">Нова заявка</h3>
+            <p class="text-[9px] text-gray-500 uppercase font-bold border-b border-white/5 pb-2 mb-6 text-left">Заповніть анкету позичальника</p>
             
-            <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-4 text-left">
                 <div>
-                    <label class="text-[9px] font-black uppercase text-gray-500 ml-2">Термін</label>
-                    <select id="loan-term" style="appearance: none; -webkit-appearance: none; background-color: #111; color: white; border: 1px solid #222; padding: 12px 16px; border-radius: 1.2rem; width: 100%; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 0.6em auto;">
-                        <option value="1">1 місяць</option>
-                        <option value="3">3 місяці</option>
-                        <option value="6">6 місяців</option>
-                        <option value="9">9 місяців</option>
-                    </select>
+                    <label class="text-[9px] font-black uppercase text-gray-500 ml-2">Сума кредиту (₴)</label>
+                    <input type="text" id="loan-amount" placeholder="50000" 
+                        oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(parseInt(this.value) > 1000000) this.value = 1000000;" 
+                        inputmode="numeric">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[9px] font-black uppercase text-gray-500 ml-2">Термін</label>
+                        <select id="loan-term">
+                            <option value="1">1 місяць</option>
+                            <option value="3">3 місяці</option>
+                            <option value="6">6 місяців</option>
+                            <option value="9">9 місяців</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black uppercase text-gray-500 ml-2">Roblox Nickname</label>
+                        <input type="text" id="roblox-nick" placeholder="@username">
+                    </div>
                 </div>
                 <div>
-                    <label class="text-[9px] font-black uppercase text-gray-500 ml-2">Roblox Nickname</label>
-                    <input type="text" id="roblox-nick" placeholder="@username">
+                    <label class="text-[9px] font-black uppercase text-gray-500 ml-2">Мета</label>
+                    <textarea id="loan-purpose" rows="2" placeholder="Якщо банк не влаштує ваша мета кредиту, він має право відмовити"></textarea>
                 </div>
+                <button onclick="sendCreditRequest()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase text-xs mt-4 hover:bg-gray-200 transition-all active:scale-95">
+                    Відправити
+                </button>
+                <button onclick="closeModal('order-modal')" class="w-full text-[10px] font-bold text-gray-500 uppercase mt-2 text-center hover:text-white transition-colors">
+                    Скасувати
+                </button>
             </div>
-            
-            <div>
-                <label class="text-[9px] font-black uppercase text-gray-500 ml-2">Мета</label>
-                <textarea id="loan-purpose" rows="2" placeholder="Якщо банка не влаштує ваша мета кредиту, він має право вам відмовити"></textarea>
-            </div>
-            
-            <button onclick="sendCreditRequest()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase text-xs mt-4 hover:bg-gray-200 transition-all active:scale-95">
-                Відправити
-            </button>
-            <button onclick="closeModal('order-modal')" class="w-full text-[10px] font-bold text-gray-500 uppercase mt-2 text-center hover:text-white transition-colors">
-                Скасувати
-            </button>
         </div>
     </div>
-</div>
 
+    <!-- МОДАЛКА УСПІХУ -->
     <div id="success-modal">
-    <div class="modal-content text-center">
-        <div class="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500 text-3xl shadow-lg shadow-green-500/5">
-            <i class="fas fa-check-double animate-bounce"></i>
-        </div>
-
-        <h3 class="text-2xl font-black uppercase italic mb-2 tracking-tighter text-white">Заявка прийнята</h3>
-        
-        <div class="space-y-3 mb-8">
-            <p class="text-[11px] text-gray-400 leading-relaxed px-2">
-                Ваша заявка на кредит успішно надіслана до <span class="text-white font-bold italic uppercase">KedraBank</span>.
-            </p>
-            
-            <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
-                <p class="text-[9px] text-gray-500 uppercase font-black mb-1 text-left">Регламент розгляду</p>
-                <div class="flex items-center gap-3 text-left">
-                    <i class="far fa-clock text-green-500"></i>
-                    <p class="text-[10px] text-white font-medium italic">Від 5 хвилин до 48 годин</p>
-                </div>
+        <div class="modal-content text-center">
+            <div class="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500 text-3xl shadow-lg shadow-green-500/5">
+                <i class="fas fa-check-double animate-bounce"></i>
             </div>
-
-            <p class="text-[9px] text-gray-500 italic">
-                Статус кредиту оновиться в особистому кабінеті автоматично після рішення банкіра.
-            </p>
+            <h3 class="text-2xl font-black uppercase italic mb-2 tracking-tighter text-white">Заявка прийнята</h3>
+            <div class="space-y-3 mb-8">
+                <p class="text-[11px] text-gray-400 leading-relaxed px-2">
+                    Ваша заявка на кредит успішно надіслана до <span class="text-white font-bold italic uppercase">KedraBank</span>.
+                </p>
+                <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+                    <p class="text-[9px] text-gray-500 uppercase font-black mb-1 text-left">Регламент розгляду</p>
+                    <div class="flex items-center gap-3 text-left">
+                        <i class="far fa-clock text-green-500"></i>
+                        <p class="text-[10px] text-white font-medium italic">Від 5 хвилин до 48 годин</p>
+                    </div>
+                </div>
+                <p class="text-[9px] text-gray-500 italic">
+                    Статус кредиту оновиться в особистому кабінеті автоматично після рішення банкіра.
+                </p>
+            </div>
+            <button onclick="closeModal('success-modal')" class="w-full bg-white text-black py-5 rounded-3xl font-black uppercase text-xs tracking-widest hover:bg-gray-200 transition-colors">
+                Зрозуміло
+            </button>
         </div>
-
-        <button onclick="closeModal('success-modal')" class="w-full bg-white text-black py-5 rounded-3xl font-black uppercase text-xs tracking-widest hover:bg-gray-200 transition-colors">
-            Зрозуміло
-        </button>
     </div>
-</div>
 
+    <!-- МОДАЛКА ТАРИФІВ -->
     <div id="tariffs-modal">
-    <div class="modal-content !max-w-[500px]">
-        <h3 class="text-3xl font-black mb-1 uppercase italic tracking-tighter">Тарифи</h3>
-        <p class="text-[9px] text-gray-500 uppercase font-bold border-b border-white/5 pb-3 mb-6">Згідно з регламентом НБУ та внутрішньою політикою KBank</p>
-        
-        <div class="space-y-3 overflow-y-auto max-h-[60vh] pr-2">
-            <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
-                <p class="text-[8px] text-gray-500 uppercase font-black mb-1">Річна процентна ставка (APR)</p>
-                <div class="flex justify-between items-end">
-                    <p class="font-bold text-xl text-white">182.5% <span class="text-[10px] text-white/40 font-normal italic">(0.5% на добу)</span></p>
-                    <i class="fas fa-percent text-white/5 mb-1"></i>
+        <div class="modal-content !max-w-[500px]">
+            <h3 class="text-3xl font-black mb-1 uppercase italic tracking-tighter">Тарифи</h3>
+            <p class="text-[9px] text-gray-500 uppercase font-bold border-b border-white/5 pb-3 mb-6">Згідно з регламентом НБУ та внутрішньою політикою KBank</p>
+            <div class="space-y-3 overflow-y-auto max-h-[60vh] pr-2">
+                <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <p class="text-[8px] text-gray-500 uppercase font-black mb-1">Річна процентна ставка (APR)</p>
+                    <div class="flex justify-between items-end">
+                        <p class="font-bold text-xl text-white">182.5% <span class="text-[10px] text-white/40 font-normal italic">(0.5% на добу)</span></p>
+                        <i class="fas fa-percent text-white/5 mb-1"></i>
+                    </div>
+                </div>
+                <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <p class="text-[8px] text-gray-500 uppercase font-black mb-1">Максимальна сума кредитування</p>
+                    <div class="flex justify-between items-end">
+                        <p class="font-bold text-xl text-green-500">1,000,000 ₴</p>
+                        <i class="fas fa-vault text-white/5 mb-1"></i>
+                    </div>
+                </div>
+                <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <p class="text-[8px] text-gray-500 uppercase font-black mb-1">Комісії та приховані платежі</p>
+                    <div class="flex justify-between items-center">
+                        <p class="font-bold text-white uppercase text-xs">Відсутні <span class="text-[10px] text-green-500/50 ml-2">0 ₴</span></p>
+                        <i class="fas fa-shield-halved text-white/5"></i>
+                    </div>
+                </div>
+                <div class="p-4 bg-white/5 rounded-2xl border border-white/10 border-dashed">
+                    <p class="text-[8px] text-red-500 uppercase font-black mb-1">Штраф за прострочення</p>
+                    <p class="text-[10px] text-gray-400 leading-tight">У разі затримки платежу понад 36 годин після закінчення терміну кредиту, банк нараховує пеню у розмірі <span class="text-white font-bold">1% за кожен день</span> та має право на примусове стягнення активів.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-[9px] uppercase font-black text-gray-500 px-2">
+                    <div class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Дострокове погашення</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Без поручителя</div>
                 </div>
             </div>
-
-            <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
-                <p class="text-[8px] text-gray-500 uppercase font-black mb-1">Максимальна сума кредитування</p>
-                <div class="flex justify-between items-end">
-                    <p class="font-bold text-xl text-green-500">1,000,000 ₴</p>
-                    <i class="fas fa-vault text-white/5 mb-1"></i>
-                </div>
-            </div>
-
-            <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
-                <p class="text-[8px] text-gray-500 uppercase font-black mb-1">Комісії та приховані платежі</p>
-                <div class="flex justify-between items-center">
-                    <p class="font-bold text-white uppercase text-xs">Відсутні <span class="text-[10px] text-green-500/50 ml-2">0 ₴</span></p>
-                    <i class="fas fa-shield-halved text-white/5"></i>
-                </div>
-            </div>
-
-            <div class="p-4 bg-white/5 rounded-2xl border border-white/10 border-dashed">
-                <p class="text-[8px] text-red-500 uppercase font-black mb-1">Штраф за прострочення</p>
-                <p class="text-[10px] text-gray-400 leading-tight">У разі затримки платежу понад 36 годин після закінчення терміну кредиту, банк нараховує пеню у розмірі <span class="text-white font-bold">1% за кожен день</span> та має право на примусове стягнення активів.</p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3 text-[9px] uppercase font-black text-gray-500 px-2">
-                <div class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Дострокове погашення</div>
-                <div class="flex items-center gap-2"><i class="fas fa-check text-green-500"></i> Без поручителя</div>
-            </div>
+            <button onclick="closeModal('tariffs-modal')" class="w-full bg-white text-black py-5 rounded-3xl mt-8 font-black uppercase text-xs tracking-widest hover:bg-gray-200 transition-colors">Ознайомлений(а)</button>
         </div>
-
-        <button onclick="closeModal('tariffs-modal')" class="w-full bg-white text-black py-5 rounded-3xl mt-8 font-black uppercase text-xs tracking-widest hover:bg-gray-200 transition-colors">Ознайомлений(а)</button>
     </div>
-</div>
 
     <script>
         const CLIENT_ID = '1488509930485841961';
@@ -253,96 +386,77 @@
         const JSON_URL = 'https://raw.githubusercontent.com/xeraze/KBank/main/database.json';
 
         let hasActiveLoan = false;
+        let isLoadingData = true;   // блокує кнопку оформлення до завантаження статусу
 
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        function openOrder() { if(hasActiveLoan) return alert('У вас вже є активний кредит!'); openModal('order-modal'); }
-        function logout() { localStorage.clear(); window.location.reload(); }
+
+        async function openOrder() {
+            if (isLoadingData) {
+                alert("⏳ Зачекайте, дані завантажуються... Спробуйте за мить.");
+                return;
+            }
+            if (hasActiveLoan) {
+                alert("❌ У вас вже є активний кредит! Погасіть поточний, щоб оформити новий.");
+                return;
+            }
+            openModal('order-modal');
+        }
+
+        function logout() { 
+            localStorage.clear(); 
+            window.location.reload(); 
+        }
 
         function showCabinet() {
             document.getElementById('view-landing').classList.add('hidden');
             document.getElementById('view-cabinet').classList.remove('hidden');
-            document.getElementById('profile-menu').classList.add('hidden');
+            document.getElementById('profile-menu')?.classList.add('hidden');
         }
+
         function showLanding() {
             document.getElementById('view-cabinet').classList.add('hidden');
             document.getElementById('view-landing').classList.remove('hidden');
         }
+
         function toggleProfileMenu() {
-            document.getElementById('profile-menu').classList.toggle('hidden');
+            const menu = document.getElementById('profile-menu');
+            if (menu) menu.classList.toggle('hidden');
         }
+
         function loginDiscord() {
             window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + window.location.pathname)}&response_type=token&scope=identify`;
         }
 
-        // const card = document.querySelector('.k-card');
-//         const container = document.querySelector('#card-box');
-//         if (container && card) {
-//             container.addEventListener('mousemove', (e) => {
-//                 const rect = container.getBoundingClientRect();
-//                 const x = e.clientX - rect.left;
-//                 const y = e.clientY - rect.top;
-                
-//                 const centerX = rect.width / 2;
-//                 const centerY = rect.height / 2;
-                
-//                 const rotateY = ((x - centerX) / centerX) * 15; 
-//                 const rotateX = ((centerY - y) / centerY) * 15;
-                
-//                 card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-//             });
-            
-//             container.addEventListener('mouseleave', () => {
-//                 card.style.transform = `rotateX(0deg) rotateY(0deg)`;
-//             });
-//         }
-
-
-        window.onload = async () => {
-            const frag = new URLSearchParams(window.location.hash.slice(1));
-            if (frag.has('access_token')) {
-                try {
-                    const res = await fetch('https://discord.com/api/users/@me', { 
-                        headers: { Authorization: `Bearer ${frag.get('access_token')}` } 
-                    });
-                    if (res.ok) {
-                        localStorage.setItem('kbank_user', JSON.stringify(await res.json()));
-                    }
-                } catch (e) { console.error("Auth error:", e); }
-                window.history.replaceState({}, "", window.location.pathname);
-            }
-            
-            const loginBtn = document.getElementById('login-btn-mid');
-            if (loginBtn) loginBtn.onclick = () => loginDiscord();
-            
-            updateUI();
-        };
-
+        // Основний рендер UI після логіна
         async function updateUI() {
             const user = JSON.parse(localStorage.getItem('kbank_user'));
             if (!user) return;
 
-            const elCardNum = document.getElementById('card_num_display');
-            const elTopName = document.getElementById('top-username');
-            const elUserName = document.getElementById('user-name');
-            const elTopAvatar = document.getElementById('top-avatar');
-            const elUserAvatar = document.getElementById('user-avatar');
-            const elLoginBtn = document.getElementById('login-btn-mid');
-            const elProfileTop = document.getElementById('user-profile-top');
+            // заповнення імен та аватарів
+            const cardNumSpan = document.getElementById('card_num_display');
+            const topName = document.getElementById('top-username');
+            const userNameSpan = document.getElementById('user-name');
+            const topAvatar = document.getElementById('top-avatar');
+            const userAvatar = document.getElementById('user-avatar');
+            const loginBtn = document.getElementById('login-btn-mid');
+            const profileTop = document.getElementById('user-profile-top');
+            const cardUsernameSpan = document.getElementById('card-username');
 
-            if (elCardNum) elCardNum.innerText = user.id.toString().slice(-4);
-            if (elTopName) elTopName.innerText = user.username;
-            if (elUserName) elUserName.innerText = user.username;
+            if (cardNumSpan) cardNumSpan.innerText = user.id.toString().slice(-4);
+            if (topName) topName.innerText = user.username;
+            if (userNameSpan) userNameSpan.innerText = user.username;
+            if (cardUsernameSpan) cardUsernameSpan.innerText = user.username.toUpperCase();
             
             const avatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
-            if (elTopAvatar) elTopAvatar.src = avatarUrl;
-            if (elUserAvatar) elUserAvatar.src = avatarUrl;
-            if (elLoginBtn) elLoginBtn.classList.add('hidden');
-            if (elProfileTop) elProfileTop.classList.remove('hidden');
+            if (topAvatar) topAvatar.src = avatarUrl;
+            if (userAvatar) userAvatar.src = avatarUrl;
+            if (loginBtn) loginBtn.classList.add('hidden');
+            if (profileTop) profileTop.classList.remove('hidden');
 
-            const val = document.getElementById('credit-value');
-            const lbl = document.getElementById('pending-label');
-            const topBal = document.getElementById('top-balance');
+            const creditVal = document.getElementById('credit-value');
+            const pendingLabel = document.getElementById('pending-label');
+            const topBalanceSpan = document.getElementById('top-balance');
 
             let displayAmount = '0 ₴';
             let isPending = false;
@@ -351,30 +465,41 @@
             try {
                 const res = await fetch(JSON_URL + '?t=' + Date.now());
                 const db = await res.json();
-                const dbUser = db.users.find(u => String(u.id) === String(user.id));
+                const dbUser = db.users?.find(u => String(u.id) === String(user.id));
 
                 if (dbUser && dbUser.status === 'approved') {
-                    displayAmount = dbUser.amount.toLocaleString() + ' ₴';
-                    localStorage.removeItem('kbank_loan');
+                    displayAmount = Number(dbUser.amount).toLocaleString() + ' ₴';
                     hasActiveLoan = true;
+                    isPending = false;
                 } else {
-                    const local = JSON.parse(localStorage.getItem('kbank_loan'));
-                    if (local) {
-                        displayAmount = parseInt(local.amount).toLocaleString() + ' ₴';
+                    const localLoan = JSON.parse(localStorage.getItem('kbank_loan'));
+                    if (localLoan && localLoan.amount) {
+                        displayAmount = parseInt(localLoan.amount).toLocaleString() + ' ₴';
                         isPending = true;
                         hasActiveLoan = true;
                     }
                 }
-            } catch(e) { console.error("DB Error:", e); }
-
-            if (val) {
-                val.innerText = displayAmount;
-                val.className = isPending ? 'text-5xl font-black tracking-tighter text-white/20 italic' : 'text-5xl font-black tracking-tighter text-white';
+            } catch(e) {
+                console.warn("Помилка отримання JSON:", e);
+                const localLoan = JSON.parse(localStorage.getItem('kbank_loan'));
+                if (localLoan) {
+                    displayAmount = parseInt(localLoan.amount).toLocaleString() + ' ₴';
+                    isPending = true;
+                    hasActiveLoan = true;
+                }
+            } finally {
+                isLoadingData = false;
             }
-            if (lbl) isPending ? lbl.classList.remove('hidden') : lbl.classList.add('hidden');
-            if (topBal) topBal.innerText = displayAmount;
+
+            if (creditVal) {
+                creditVal.innerText = displayAmount;
+                creditVal.className = isPending ? 'text-5xl font-black tracking-tighter text-white/40 italic' : 'text-5xl font-black tracking-tighter text-white';
+            }
+            if (pendingLabel) isPending ? pendingLabel.classList.remove('hidden') : pendingLabel.classList.add('hidden');
+            if (topBalanceSpan) topBalanceSpan.innerText = displayAmount;
         }
 
+        // Відправка заявки у Discord webhook
         async function sendCreditRequest() {
             const amount = document.getElementById('loan-amount').value;
             const term = document.getElementById('loan-term').value;
@@ -382,18 +507,20 @@
             const purpose = document.getElementById('loan-purpose').value;
             const user = JSON.parse(localStorage.getItem('kbank_user'));
 
-            if (!amount || !nick || !purpose) return alert('Будь ласка, заповніть усі поля!');
+            if (!amount || !nick || !purpose) return alert('❗ Будь ласка, заповніть усі поля!');
+            if (parseInt(amount) < 1000) return alert('Мінімальна сума кредиту — 1000 ₴');
+            if (parseInt(amount) > 1000000) return alert('Максимальна сума кредиту — 1 000 000 ₴');
 
             const payload = {
                 embeds: [{
-                    title: "НОВА ЗАЯВКА НА КРЕДИТ",
+                    title: "📋 НОВА ЗАЯВКА НА КРЕДИТ",
                     color: 0xffffff,
                     fields: [
-                        { name: "Клієнт", value: `<@${user.id}> (${user.username})` },
-                        { name: "Сума", value: `${amount} ₴`, inline: true },
-                        { name: "Термін", value: `${term} місяців`, inline: true },
-                        { name: "Roblox Nickname", value: nick, inline: true },
-                        { name: "Мета", value: `\`\`\`${purpose}\`\`\`` }
+                        { name: "👤 Клієнт", value: `<@${user.id}> (${user.username})`, inline: false },
+                        { name: "💰 Сума", value: `${amount} ₴`, inline: true },
+                        { name: "📆 Термін", value: `${term} місяці(в)`, inline: true },
+                        { name: "🎮 Roblox Nickname", value: nick, inline: true },
+                        { name: "🎯 Мета", value: `\`\`\`${purpose.slice(0, 300)}\`\`\`` }
                     ],
                     footer: { text: `ID: ${user.id} • ${new Date().toLocaleString('uk-UA')}` }
                 }]
@@ -405,12 +532,56 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                localStorage.setItem('kbank_loan', JSON.stringify({ amount, status: 'pending' }));
+                localStorage.setItem('kbank_loan', JSON.stringify({ amount, status: 'pending', date: Date.now() }));
                 closeModal('order-modal');
                 openModal('success-modal');
-                updateUI();
-            } catch (e) { alert('Помилка відправки.'); }
+                await updateUI(); // оновлюємо статус pending
+            } catch (e) { 
+                alert('❌ Помилка відправки. Спробуйте ще раз.'); 
+            }
         }
+
+        // Обробка OAuth redirect та автовхід у кабінет
+        window.onload = async () => {
+            const fragment = new URLSearchParams(window.location.hash.slice(1));
+            let needRedirect = false;
+
+            if (fragment.has('access_token')) {
+                try {
+                    const res = await fetch('https://discord.com/api/users/@me', { 
+                        headers: { Authorization: `Bearer ${fragment.get('access_token')}` } 
+                    });
+                    if (res.ok) {
+                        const userData = await res.json();
+                        localStorage.setItem('kbank_user', JSON.stringify(userData));
+                        needRedirect = true;
+                    }
+                } catch (e) { console.error("Auth помилка:", e); }
+                window.history.replaceState({}, "", window.location.pathname);
+            }
+
+            const loginBtn = document.getElementById('login-btn-mid');
+            if (loginBtn) loginBtn.onclick = () => loginDiscord();
+
+            // Якщо користувач вже залогінений або щойно залогінився — одразу показуємо кабінет
+            const storedUser = JSON.parse(localStorage.getItem('kbank_user'));
+            if (storedUser) {
+                await updateUI();
+                if (needRedirect || window.location.hash === '') {
+                    showCabinet();
+                } else {
+                    // якщо є юзер але лендінг, теж показуємо кабінет для зручності
+                    showCabinet();
+                }
+            } else {
+                // гарантуємо, що лендінг активний
+                document.getElementById('view-landing').classList.remove('hidden');
+                document.getElementById('view-cabinet').classList.add('hidden');
+            }
+        };
+
+        // Додаткове оновлення після модалок
+        window.updateUI = updateUI;
     </script>
 </body>
 </html>
