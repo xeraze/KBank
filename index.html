@@ -274,27 +274,28 @@
             window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + window.location.pathname)}&response_type=token&scope=identify`;
         }
 
-        const card = document.querySelector('.k-card');
-        const container = document.querySelector('#card-box');
-        if (container && card) {
-            container.addEventListener('mousemove', (e) => {
-                const rect = container.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
+        // const card = document.querySelector('.k-card');
+//         const container = document.querySelector('#card-box');
+//         if (container && card) {
+//             container.addEventListener('mousemove', (e) => {
+//                 const rect = container.getBoundingClientRect();
+//                 const x = e.clientX - rect.left;
+//                 const y = e.clientY - rect.top;
                 
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
+//                 const centerX = rect.width / 2;
+//                 const centerY = rect.height / 2;
                 
-                const rotateY = ((x - centerX) / centerX) * 15; 
-                const rotateX = ((centerY - y) / centerY) * 15;
+//                 const rotateY = ((x - centerX) / centerX) * 15; 
+//                 const rotateX = ((centerY - y) / centerY) * 15;
                 
-                card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-            });
+//                 card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+//             });
             
-            container.addEventListener('mouseleave', () => {
-                card.style.transform = `rotateX(0deg) rotateY(0deg)`;
-            });
-        }
+//             container.addEventListener('mouseleave', () => {
+//                 card.style.transform = `rotateX(0deg) rotateY(0deg)`;
+//             });
+//         }
+
 
         window.onload = async () => {
             const frag = new URLSearchParams(window.location.hash.slice(1));
