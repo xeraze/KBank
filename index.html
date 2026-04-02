@@ -578,7 +578,7 @@ async function requestNewCard(cardType) {
     
     var payload = {
         embeds: [{
-            title: "💳 НОВА ЗАЯВКА НА КАРТКУ",
+            title: "НОВА ЗАЯВКА НА КАРТКУ",
             color: 0x22c55e,
             fields: [
                 { name: "Клієнт", value: '<@' + user.id + '> (' + user.username + ')', inline: false },
@@ -596,10 +596,10 @@ async function requestNewCard(cardType) {
             body: JSON.stringify(payload)
         });
         
-        alert('✅ Заявка на ' + typeNames[cardType] + ' успішно надіслана! Після схвалення адміністратором картка з\'явиться у вашому кабінеті.');
+        alert('Заявка на ' + typeNames[cardType] + ' успішно надіслана! Після схвалення адміністратором картка з\'явиться у вашому кабінеті.');
         
     } catch (e) {
-        alert('❌ Помилка відправки заявки. Спробуйте ще раз.');
+        alert('Помилка відправки заявки. Спробуйте ще раз.');
     }
 }
 
@@ -672,14 +672,14 @@ async function sendCreditRequest() {
 
     var payload = {
         embeds: [{
-            title: "📋 НОВА ЗАЯВКА НА КРЕДИТ",
+            title: "НОВА ЗАЯВКА НА КРЕДИТ",
             color: 0xffffff,
             fields: [
-                { name: "👤 Клієнт", value: '<@' + user.id + '> (' + user.username + ')', inline: false },
-                { name: "💰 Сума", value: amount + ' ₴', inline: true },
-                { name: "📆 Термін", value: term + ' місяці(в)', inline: true },
-                { name: "🎮 Roblox Nickname", value: nick, inline: true },
-                { name: "🎯 Мета", value: '```' + purpose.slice(0, 300) + '```' }
+                { name: "Клієнт", value: '<@' + user.id + '> (' + user.username + ')', inline: false },
+                { name: "Сума", value: amount + ' ₴', inline: true },
+                { name: "Термін", value: term + ' місяці(в)', inline: true },
+                { name: "Roblox Nickname", value: nick, inline: true },
+                { name: "Мета", value: '```' + purpose.slice(0, 300) + '```' }
             ],
             footer: { text: 'ID: ' + user.id + ' • ' + new Date().toLocaleString('uk-UA') }
         }]
@@ -696,7 +696,7 @@ async function sendCreditRequest() {
         openModal('success-modal');
         await updateUI();
     } catch (e) { 
-        alert('❌ Помилка відправки. Спробуйте ще раз.'); 
+        alert('Помилка відправки. Спробуйте ще раз.'); 
     }
 }
 
