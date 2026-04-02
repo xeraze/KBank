@@ -6,7 +6,7 @@
       "status": "paid", 
       "term": "8",
       "cards": [
-        {"type": "credit", "status": "verification", "meetLink": "https://meet.google.com/ria-vzoj-iys"},
+        {"type": "credit", "status": "active"},
         {"type": "salary", "status": "active"},
         {"type": "currency", "status": "active"}
       ]
