@@ -4,163 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>KedraBank — цифровий комфорт</title>
-    <!-- Tailwind + Fonts + Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" type="image/png" href="LOGO_MAIN.png">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: radial-gradient(circle at top right, #1a1a1a, #000000);
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* кастомні карткові стилі */
-        .perspective-1000 { perspective: 1000px; }
-
-        .ops-stub {
-            border: 2px dashed rgba(255,255,255,0.03);
-            border-radius: 2.5rem;
-            padding: 3rem 1rem;
-            text-align: center;
-        }
-
-        /* модальні вікна */
-        #order-modal, #success-modal, #tariffs-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.75);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-        }
-
-        .modal-content {
-            background: #0a0a0a;
-            border: 1px solid #1f1f1f;
-            width: 90%;
-            max-width: 450px;
-            padding: 2rem 1.8rem;
-            border-radius: 2rem;
-            box-shadow: 0 30px 50px rgba(0,0,0,0.6);
-        }
-
-        input, select, textarea {
-            background: #111 !important;
-            border: 1px solid #2a2a2a !important;
-            color: #ffffff !important;
-            width: 100%;
-            padding: 12px 16px !important;
-            border-radius: 1.2rem;
-            font-family: 'Inter', sans-serif;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            border-color: #ffffff30 !important;
-            background: #161616 !important;
-        }
-
-        /* КАРТА 3D FLIP (виправлено) */
-        #card-box {
-            width: 100%;
-            max-width: 320px;
-            margin: 0 auto;
-            perspective: 1000px;
-            cursor: pointer;
-        }
-
-        .k-card {
-            width: 100%;
-            aspect-ratio: 1.58 / 1;
-            perspective: 1000px;
-        }
-
-        .k-card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
-            transform-style: preserve-3d;
-            border-radius: 22px;
-        }
-
-        #card-box:hover .k-card-inner {
-            transform: rotateY(180deg);
-        }
-
-        .k-card-front, .k-card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 24px;
-            background: rgba(20, 20, 30, 0.65);
-            backdrop-filter: blur(18px);
-            border: 1px solid rgba(255,255,255,0.12);
-            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.5);
-        }
-
-        .k-card-front {
-            background: linear-gradient(135deg, rgba(30,30,40,0.9), rgba(10,10,15,0.95));
-        }
-
-        .k-card-back {
-            transform: rotateY(180deg);
-            background: linear-gradient(135deg, #0e0e12, #030303);
-        }
-
-        textarea { resize: none; }
-        input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.2) !important; }
-
-        select {
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(255,255,255,0.6)' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E") !important;
-            background-repeat: no-repeat !important;
-            background-position: right 16px center !important;
-            padding-right: 40px !important;
-        }
-
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
-
-        .status-pulse { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        .hidden { display: none !important; }
-
-        #profile-menu {
-            box-shadow: 0 20px 35px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
-            animation: fadeIn 0.2s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        button:active { transform: scale(0.97); transition: 0.05s; }
-        .transition-fast { transition: all 0.2s ease; }
-    </style>
 </head>
 <body>
-
-    <!-- LANDING VIEW -->
     <div id="view-landing" class="min-h-screen flex flex-col justify-center items-center p-6 text-center relative overflow-hidden">
         <div class="absolute top-6 right-6 z-50">
             <div id="user-profile-top" class="hidden flex-col items-end">
@@ -196,7 +45,6 @@
         </button>
     </div>
 
-    <!-- CABINET VIEW (особистий кабінет) -->
     <div id="view-cabinet" class="hidden min-h-screen max-w-md mx-auto p-4 pt-10 pb-20">
         <div class="flex justify-between items-center mb-10 relative z-30">
             <button onclick="showLanding()" class="text-white/20 hover:text-white flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all">
@@ -216,11 +64,9 @@
             <div id="pending-label" class="hidden text-[10px] text-white/30 italic mt-3 status-pulse font-bold uppercase">Очікує розгляду...</div>
         </div>
 
-        <!-- КАРТКА З FIX: обгортка #card-box для 3D flip -->
         <div id="card-box">
             <div class="k-card">
                 <div class="k-card-inner">
-                    <!-- ЛИЦЬОВИЙ БІК -->
                     <div class="k-card-front">
                         <div class="card-content p-5 flex flex-col justify-between h-full">
                             <div class="flex justify-between items-start">
@@ -240,7 +86,6 @@
                         </div>
                     </div>
 
-                    <!-- ЗВОРОТНИЙ БІК -->
                     <div class="k-card-back">
                         <div class="p-5 flex flex-col justify-between h-full">
                             <div class="w-full h-9 bg-black/70 rounded-md mt-2"></div>
@@ -270,7 +115,6 @@
         </div>
     </div>
 
-    <!-- МОДАЛКА ЗАЯВКИ -->
     <div id="order-modal">
         <div class="modal-content shadow-2xl border border-white/10">
             <h3 class="text-2xl font-black mb-1 uppercase italic tracking-tighter text-white text-left">Нова заявка</h3>
@@ -312,7 +156,6 @@
         </div>
     </div>
 
-    <!-- МОДАЛКА УСПІХУ -->
     <div id="success-modal">
         <div class="modal-content text-center">
             <div class="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500 text-3xl shadow-lg shadow-green-500/5">
@@ -340,7 +183,6 @@
         </div>
     </div>
 
-    <!-- МОДАЛКА ТАРИФІВ -->
     <div id="tariffs-modal">
         <div class="modal-content !max-w-[500px]">
             <h3 class="text-3xl font-black mb-1 uppercase italic tracking-tighter">Тарифи</h3>
@@ -386,7 +228,7 @@
         const JSON_URL = 'https://raw.githubusercontent.com/xeraze/KBank/main/database.json';
 
         let hasActiveLoan = false;
-        let isLoadingData = true;   // блокує кнопку оформлення до завантаження статусу
+        let isLoadingData = true;
 
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -428,12 +270,10 @@
             window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + window.location.pathname)}&response_type=token&scope=identify`;
         }
 
-        // Основний рендер UI після логіна
         async function updateUI() {
             const user = JSON.parse(localStorage.getItem('kbank_user'));
             if (!user) return;
 
-            // заповнення імен та аватарів
             const cardNumSpan = document.getElementById('card_num_display');
             const topName = document.getElementById('top-username');
             const userNameSpan = document.getElementById('user-name');
@@ -499,7 +339,6 @@
             if (topBalanceSpan) topBalanceSpan.innerText = displayAmount;
         }
 
-        // Відправка заявки у Discord webhook
         async function sendCreditRequest() {
             const amount = document.getElementById('loan-amount').value;
             const term = document.getElementById('loan-term').value;
@@ -535,13 +374,12 @@
                 localStorage.setItem('kbank_loan', JSON.stringify({ amount, status: 'pending', date: Date.now() }));
                 closeModal('order-modal');
                 openModal('success-modal');
-                await updateUI(); // оновлюємо статус pending
+                await updateUI();
             } catch (e) { 
                 alert('❌ Помилка відправки. Спробуйте ще раз.'); 
             }
         }
 
-        // Обробка OAuth redirect та автовхід у кабінет
         window.onload = async () => {
             const fragment = new URLSearchParams(window.location.hash.slice(1));
             let needRedirect = false;
@@ -563,24 +401,20 @@
             const loginBtn = document.getElementById('login-btn-mid');
             if (loginBtn) loginBtn.onclick = () => loginDiscord();
 
-            // Якщо користувач вже залогінений або щойно залогінився — одразу показуємо кабінет
             const storedUser = JSON.parse(localStorage.getItem('kbank_user'));
             if (storedUser) {
                 await updateUI();
                 if (needRedirect || window.location.hash === '') {
                     showCabinet();
                 } else {
-                    // якщо є юзер але лендінг, теж показуємо кабінет для зручності
                     showCabinet();
                 }
             } else {
-                // гарантуємо, що лендінг активний
                 document.getElementById('view-landing').classList.remove('hidden');
                 document.getElementById('view-cabinet').classList.add('hidden');
             }
         };
 
-        // Додаткове оновлення після модалок
         window.updateUI = updateUI;
     </script>
 </body>
