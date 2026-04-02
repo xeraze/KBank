@@ -278,13 +278,9 @@
             window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + window.location.pathname)}&response_type=token&scope=identify`;
         }
 
-let cardTypeIndex = 0;
-const cardTypes = ['credit', 'salary', 'currency'];
-const cardContainer = document.getElementById('card-box')?.parentElement?.parentElement;
-
-const cardWrapper = document.getElementById('card-box');
-
-function applyCardType() {
+        function applyCardType() {
+    const cardBox = document.getElementById('card-box');
+    if (!cardBox) return;
     const type = cardTypes[cardTypeIndex];
     cardBox.classList.remove('credit-card', 'salary-card', 'currency-card');
     cardBox.classList.add(`${type}-card`);
@@ -315,16 +311,6 @@ function applyCardType() {
         }
     }
 }
-
-document.getElementById('prev-card')?.addEventListener('click', () => {
-    cardTypeIndex = (cardTypeIndex - 1 + cardTypes.length) % cardTypes.length;
-    applyCardType();
-});
-document.getElementById('next-card')?.addEventListener('click', () => {
-    cardTypeIndex = (cardTypeIndex + 1) % cardTypes.length;
-    applyCardType();
-});
-
 
         async function updateUI() {
             const user = JSON.parse(localStorage.getItem('kbank_user'));
@@ -405,6 +391,22 @@ document.getElementById('next-card')?.addEventListener('click', () => {
             if (pendingLabel) isPending ? pendingLabel.classList.remove('hidden') : pendingLabel.classList.add('hidden');
             if (topBalanceSpan) topBalanceSpan.innerText = displayAmount;
         }
+
+        
+
+const prevBtn = document.getElementById('prev-card');
+const nextBtn = document.getElementById('next-card');
+if (prevBtn && nextBtn) {
+    prevBtn.addEventListener('click', () => {
+        cardTypeIndex = (cardTypeIndex - 1 + cardTypes.length) % cardTypes.length;
+        applyCardType();
+    });
+    nextBtn.addEventListener('click', () => {
+        cardTypeIndex = (cardTypeIndex + 1) % cardTypes.length;
+        applyCardType();
+    });
+}
+applyCardType();
 
         async function sendCreditRequest() {
             const amount = document.getElementById('loan-amount').value;
