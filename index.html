@@ -236,7 +236,7 @@
         const JSON_URL = 'https://raw.githubusercontent.com/xeraze/KBank/main/database.json';
         let cardTypeIndex = 0;
         const cardTypes = ['credit', 'salary', 'currency'];
-        let userAvailableCards = [];
+        let userAvailableCards = ['credit', 'salary', 'currency'];
         let currentCardIndexInAvailable = 0;
 
         let hasActiveLoan = false;
@@ -305,7 +305,14 @@ function getCardCvc(userId, type) {
         function applyCardType() {
     const cardBox = document.getElementById('card-box');
     if (!cardBox) return;
-    const type = cardTypes[cardTypeIndex];
+    
+    if (userAvailableCards.length === 0) return;
+    
+    if (currentCardIndexInAvailable >= userAvailableCards.length) {
+        currentCardIndexInAvailable = 0;
+    }
+    
+    const type = userAvailableCards[currentCardIndexInAvailable];
     cardBox.classList.remove('credit-card', 'salary-card', 'currency-card');
     cardBox.classList.add(`${type}-card`);
     
@@ -335,12 +342,12 @@ function getCardCvc(userId, type) {
         cvcSpan.style.fontSize = '';
     }
 }
-        function updateArrowsVisibility() {
+       function updateArrowsVisibility() {
     const prevArrow = document.getElementById('prev-card');
     const nextArrow = document.getElementById('next-card');
     
     if (!prevArrow || !nextArrow) return;
-            
+    
     if (userAvailableCards.length <= 1) {
         prevArrow.style.visibility = 'hidden';
         nextArrow.style.visibility = 'hidden';
@@ -417,12 +424,6 @@ function getCardCvc(userId, type) {
     } finally {
         isLoadingData = false;
     }
-
-    if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
-        userAvailableCards = dbUser.cards;
-    } else {
-        userAvailableCards = ['credit', 'salary', 'currency'];
-    }
     
     updateArrowsVisibility();
     
@@ -435,6 +436,19 @@ function getCardCvc(userId, type) {
         creditVal.innerText = displayAmount;
         creditVal.className = isPending ? 'text-5xl font-black tracking-tighter text-white/40 italic' : 'text-5xl font-black tracking-tighter text-white';
     }
+
+if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
+    userAvailableCards = dbUser.cards;
+} else {
+    userAvailableCards = ['credit', 'salary', 'currency'];
+}
+
+updateArrowsVisibility();
+
+if (currentCardIndexInAvailable >= userAvailableCards.length) {
+    currentCardIndexInAvailable = 0;
+}
+applyCardType();
     if (pendingLabel) isPending ? pendingLabel.classList.remove('hidden') : pendingLabel.classList.add('hidden');
     if (topBalanceSpan) topBalanceSpan.innerText = displayAmount;
 }
