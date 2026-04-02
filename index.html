@@ -263,6 +263,7 @@ let isLoadingData = true;
 let touchStartX = 0, touchEndX = 0, isSwiping = false;
 let currentCardData = null;
 let isVerificationRequired = false;
+let userCardsFullData = null;
 
 function openModal(id) { 
     var modal = document.getElementById(id);
@@ -334,11 +335,22 @@ function applyCardType(animateDirection) {
     var cardBox = document.getElementById('card-box');
     if (!cardBox) return;
     if (userAvailableCards.length === 0) return;
+    
     if (currentCardIndexInAvailable >= userAvailableCards.length) {
         currentCardIndexInAvailable = 0;
     }
     
     var type = userAvailableCards[currentCardIndexInAvailable];
+    
+    if (typeof type === 'object' && type !== null) {
+        type = type.type;
+    }
+    
+    if (typeof type !== 'string') {
+        console.error('applyCardType: type is not a string', type);
+        return;
+    }
+    
     cardBox.classList.remove('credit-card', 'salary-card', 'currency-card');
     cardBox.classList.add(type + '-card');
     
@@ -368,6 +380,26 @@ function applyCardType(animateDirection) {
         cvcSpan.style.fontSize = '';
     }
     
+    if (userCardsFullData && Array.isArray(userCardsFullData)) {
+        for (var i = 0; i < userCardsFullData.length; i++) {
+            if (userCardsFullData[i].type === type) {
+                currentCardData = userCardsFullData[i];
+                break;
+            }
+        }
+    }
+    
+    var existingBadge = cardBox.querySelector('.card-verification-badge');
+    if (existingBadge) existingBadge.remove();
+    
+    if (currentCardData && currentCardData.status === 'verification') {
+        var badge = document.createElement('div');
+        badge.className = 'card-verification-badge';
+        badge.innerHTML = '<i class="fas fa-shield-alt mr-1"></i> Перевірка';
+        cardBox.style.position = 'relative';
+        cardBox.appendChild(badge);
+    }
+    
     if (animateDirection) {
         cardBox.classList.add('card-animate-' + animateDirection);
         setTimeout(function() {
@@ -394,8 +426,13 @@ function applyCardType(animateDirection) {
         if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
             var currentType = userAvailableCards[currentCardIndexInAvailable];
             
+            if (typeof currentType === 'object' && currentType !== null) {
+                currentType = currentType.type;
+            }
+            
             for (var i = 0; i < dbUser.cards.length; i++) {
-                if (dbUser.cards[i].type === currentType) {
+                var cardType = dbUser.cards[i].type;
+                if (cardType === currentType) {
                     currentCardData = dbUser.cards[i];
                     break;
                 }
@@ -611,10 +648,17 @@ if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
 }
     
     if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
-        userAvailableCards = dbUser.cards;
+    if (dbUser.cards.length > 0 && typeof dbUser.cards[0] === 'object') {
+        userAvailableCards = [];
+        for (var i = 0; i < dbUser.cards.length; i++) {
+            userAvailableCards.push(dbUser.cards[i].type);
+        }
+        userCardsFullData = dbUser.cards;
     } else {
-        userAvailableCards = ['credit', 'salary', 'currency'];
+        userAvailableCards = dbUser.cards;
+        userCardsFullData = null;
     }
+}
     
     if (currentCardIndexInAvailable >= userAvailableCards.length) {
         currentCardIndexInAvailable = 0;
