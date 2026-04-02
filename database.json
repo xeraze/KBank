@@ -5,7 +5,7 @@
       "amount": 1488, 
       "status": "paid", 
       "term": "8",
-      "cards": ["credit"]
+      "cards": ["credit", "salary"]
     },
     { 
       "id": "1404735389603860503", 
