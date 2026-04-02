@@ -233,17 +233,6 @@
         function openOrder() { if(hasActiveLoan) return alert('У вас вже є активний кредит!'); openModal('order-modal'); }
         function logout() { localStorage.clear(); window.location.reload(); }
 
-        function nicknameTo16Digits(nick) {
-          let hash = 0n;
-
-            for (let i = 0; i < nick.length; i++) {
-                hash = (hash * 31n + BigInt(nick.charCodeAt(i))) % 10000000000000000n;
-            }
-
-          return hash.toString().padStart(16, '0');
-         }
-
-        
         function showCabinet() {
             document.getElementById('view-landing').classList.add('hidden');
             document.getElementById('view-cabinet').classList.remove('hidden');
@@ -257,103 +246,100 @@
             document.getElementById('profile-menu').classList.toggle('hidden');
         }
         function loginDiscord() {
-            window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.href)}&response_type=token&scope=identify`;
+            window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + window.location.pathname)}&response_type=token&scope=identify`;
         }
 
         const card = document.querySelector('.k-card');
         const container = document.querySelector('#card-box');
-
-        container.addEventListener('mousemove', (e) => {
-            const rect = container.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const centerX = rect.width / 2;
-            const rotateY = ((x - centerX) / centerX) * 15; 
-
-            card.style.transform = `rotateY(${rotateY}deg)`;
-        });
-
-        container.addEventListener('mouseleave', () => {
-            card.style.transform = `rotateY(0deg)`;
-        });
+        if (container && card) {
+            container.addEventListener('mousemove', (e) => {
+                const rect = container.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const centerX = rect.width / 2;
+                const rotateY = ((x - centerX) / centerX) * 15; 
+                card.style.transform = `rotateY(${rotateY}deg)`;
+            });
+            container.addEventListener('mouseleave', () => {
+                card.style.transform = `rotateY(0deg)`;
+            });
+        }
 
         window.onload = async () => {
             const frag = new URLSearchParams(window.location.hash.slice(1));
             if (frag.has('access_token')) {
-                const res = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${frag.get('access_token')}` } });
-                localStorage.setItem('kbank_user', JSON.stringify(await res.json()));
-                window.history.replaceState({}, "", "/");
+                try {
+                    const res = await fetch('https://discord.com/api/users/@me', { 
+                        headers: { Authorization: `Bearer ${frag.get('access_token')}` } 
+                    });
+                    if (res.ok) {
+                        localStorage.setItem('kbank_user', JSON.stringify(await res.json()));
+                    }
+                } catch (e) { console.error("Auth error:", e); }
+                window.history.replaceState({}, "", window.location.pathname);
             }
             
-            document.getElementById('login-btn-mid').onclick = () => loginDiscord();
+            const loginBtn = document.getElementById('login-btn-mid');
+            if (loginBtn) loginBtn.onclick = () => loginDiscord();
             
             updateUI();
         };
 
         async function updateUI() {
-    const user = JSON.parse(localStorage.getItem('kbank_user'));
-    if (!user) return;
+            const user = JSON.parse(localStorage.getItem('kbank_user'));
+            if (!user) return;
 
-    if (document.getElementById('card_num_display')) {
-        const last4 = user.id.toString().slice(-4); 
-        document.getElementById('card_num_display').innerText = last4;
-    }
+            const elCardNum = document.getElementById('card_num_display');
+            const elTopName = document.getElementById('top-username');
+            const elUserName = document.getElementById('user-name');
+            const elTopAvatar = document.getElementById('top-avatar');
+            const elUserAvatar = document.getElementById('user-avatar');
+            const elLoginBtn = document.getElementById('login-btn-mid');
+            const elProfileTop = document.getElementById('user-profile-top');
 
-    const loginBtn = document.getElementById('login-btn-mid');
-    const profileTop = document.getElementById('user-profile-top');
-    
-    if (loginBtn) loginBtn.classList.add('hidden');
-    if (profileTop) profileTop.classList.remove('hidden');
+            if (elCardNum) elCardNum.innerText = user.id.toString().slice(-4);
+            if (elTopName) elTopName.innerText = user.username;
+            if (elUserName) elUserName.innerText = user.username;
+            
+            const avatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+            if (elTopAvatar) elTopAvatar.src = avatarUrl;
+            if (elUserAvatar) elUserAvatar.src = avatarUrl;
+            if (elLoginBtn) elLoginBtn.classList.add('hidden');
+            if (elProfileTop) elProfileTop.classList.remove('hidden');
 
-    if (document.getElementById('top-username')) document.getElementById('top-username').innerText = user.username;
-    if (document.getElementById('user-name')) document.getElementById('user-name').innerText = user.username;
-    
-    const avatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
-    if (document.getElementById('top-avatar')) document.getElementById('top-avatar').src = avatarUrl;
-    if (document.getElementById('user-avatar')) document.getElementById('user-avatar').src = avatarUrl;
+            const val = document.getElementById('credit-value');
+            const lbl = document.getElementById('pending-label');
+            const topBal = document.getElementById('top-balance');
 
-    const val = document.getElementById('credit-value');
-    const lbl = document.getElementById('pending-label');
-    if (!val || !lbl) return;
+            let displayAmount = '0 ₴';
+            let isPending = false;
+            hasActiveLoan = false;
 
-    hasActiveLoan = false;
+            try {
+                const res = await fetch(JSON_URL + '?t=' + Date.now());
+                const db = await res.json();
+                const dbUser = db.users.find(u => String(u.id) === String(user.id));
 
-    try {
-        const res = await fetch(JSON_URL + '?t=' + Date.now());
-        const db = await res.json();
-        const dbUser = db.users.find(u => String(u.id) === String(user.id));
+                if (dbUser && dbUser.status === 'approved') {
+                    displayAmount = dbUser.amount.toLocaleString() + ' ₴';
+                    localStorage.removeItem('kbank_loan');
+                    hasActiveLoan = true;
+                } else {
+                    const local = JSON.parse(localStorage.getItem('kbank_loan'));
+                    if (local) {
+                        displayAmount = parseInt(local.amount).toLocaleString() + ' ₴';
+                        isPending = true;
+                        hasActiveLoan = true;
+                    }
+                }
+            } catch(e) { console.error("DB Error:", e); }
 
-        if (dbUser) {
-            if (dbUser.status === 'approved') {
-                val.innerText = dbUser.amount.toLocaleString() + ' ₴';
-                val.className = 'text-5xl font-black tracking-tighter text-white';
-                lbl.classList.add('hidden'); 
-                localStorage.removeItem('kbank_loan');
-                hasActiveLoan = true;
-                return;
-            } else if (dbUser.status === 'paid') {
-                val.innerText = '0 ₴';
-                val.className = 'text-5xl font-black tracking-tighter text-white';
-                lbl.classList.add('hidden');
-                localStorage.removeItem('kbank_loan');
-                hasActiveLoan = false;
-                return;
+            if (val) {
+                val.innerText = displayAmount;
+                val.className = isPending ? 'text-5xl font-black tracking-tighter text-white/20 italic' : 'text-5xl font-black tracking-tighter text-white';
             }
+            if (lbl) isPending ? lbl.classList.remove('hidden') : lbl.classList.add('hidden');
+            if (topBal) topBal.innerText = displayAmount;
         }
-    } catch(e) { console.error("Помилка БД:", e); }
-
-    const local = JSON.parse(localStorage.getItem('kbank_loan'));
-    if (local) {
-        val.innerText = parseInt(local.amount).toLocaleString() + ' ₴';
-        val.className = 'text-5xl font-black tracking-tighter text-white/20 italic';
-        lbl.classList.remove('hidden');
-        hasActiveLoan = true;
-    } else {
-        val.innerText = '0 ₴';
-        val.className = 'text-5xl font-black tracking-tighter text-white';
-        lbl.classList.add('hidden');
-        hasActiveLoan = false;
-    }
-}
 
         async function sendCreditRequest() {
             const amount = document.getElementById('loan-amount').value;
