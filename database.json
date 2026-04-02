@@ -5,14 +5,21 @@
       "amount": 1488, 
       "status": "paid", 
       "term": "8",
-      "cards": ["credit", "salary"]
+      "cards": [
+        {"type": "credit", "status": "active"},
+        {"type": "salary", "status": "verification", "meetLink": "https://meet.google.com/abc-defg-hij"},
+        {"type": "currency", "status": "pending"}
+      ]
     },
     { 
       "id": "1404735389603860503", 
       "amount": 50000, 
       "status": "paid", 
       "term": "2",
-      "cards": ["credit", "salary"]
+      "cards": [
+        {"type": "credit", "status": "active"},
+        {"type": "salary", "status": "active"}
+      ]
     }
   ]
 }
