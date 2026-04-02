@@ -335,6 +335,84 @@ function checkCurrentCardVerification() {
     isVerificationRequired = false;
     return false;
 }
+        function hasAnyCards() {
+    return userAvailableCards && userAvailableCards.length > 0;
+}
+
+function updateUIByCardsAvailability() {
+    var hasCards = hasAnyCards();
+    
+    var elementsToHide = [
+        { selector: '#credit-value', id: 'credit-value' },
+        { selector: '#pending-label', id: 'pending-label' },
+        { selector: '.grid-cols-2', className: 'grid-cols-2' },
+        { selector: '.ops-stub', className: 'ops-stub' },
+        { selector: '#prev-card', id: 'prev-card' },
+        { selector: '#next-card', id: 'next-card' },
+        { selector: '#card-box', id: 'card-box' },
+        { selector: '.card-switch-container', className: 'card-switch-container' }
+    ];
+    
+    if (!hasCards) {
+        elementsToHide.forEach(function(item) {
+            var el = item.id ? document.getElementById(item.id) : document.querySelector(item.selector);
+            if (el) {
+                el.style.display = 'none';
+            }
+        });
+        
+        showNoCardsMessage(true);
+        
+        var newCardBtn = document.getElementById('new-card-btn');
+        if (newCardBtn) {
+            newCardBtn.style.display = 'flex';
+        }
+        
+        var creditStatus = document.getElementById('credit-card-status');
+        if (creditStatus) creditStatus.style.display = 'none';
+        
+    } else {
+        elementsToHide.forEach(function(item) {
+            var el = item.id ? document.getElementById(item.id) : document.querySelector(item.selector);
+            if (el) {
+                el.style.display = '';
+            }
+        });
+        
+        showNoCardsMessage(false);
+        
+        updateArrowsVisibility();
+    }
+}
+
+function showNoCardsMessage(show) {
+    var existingMsg = document.getElementById('no-cards-message');
+    
+    if (show) {
+        if (!existingMsg) {
+            var msgDiv = document.createElement('div');
+            msgDiv.id = 'no-cards-message';
+            msgDiv.className = 'text-center py-12 px-6 bg-white/5 border border-white/10 rounded-3xl my-8';
+            msgDiv.innerHTML = `
+                <div class="w-20 h-20 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-credit-card text-yellow-500 text-3xl"></i>
+                </div>
+                <p class="text-white font-black uppercase text-lg mb-2">Немає жодної картки</p>
+                <p class="text-gray-400 text-[11px] mb-6">Натисніть кнопку <i class="fas fa-plus"></i> щоб замовити першу картку</p>
+            `;
+            
+            var cabinet = document.getElementById('view-cabinet');
+            var cardSwitchContainer = document.querySelector('.card-switch-container');
+            if (cabinet && cardSwitchContainer) {
+                cabinet.insertBefore(msgDiv, cardSwitchContainer);
+            }
+        }
+    } else {
+        if (existingMsg) {
+            existingMsg.remove();
+        }
+    }
+}
 
 function applyCardType(animateDirection) {
     var cardBox = document.getElementById('card-box');
@@ -455,7 +533,7 @@ function updateArrowsVisibility() {
     var nextArrow = document.getElementById('next-card');
     if (!prevArrow || !nextArrow) return;
     
-    if (userAvailableCards.length <= 1) {
+    if (!hasAnyCards() || userAvailableCards.length <= 1) {
         prevArrow.style.visibility = 'hidden';
         nextArrow.style.visibility = 'hidden';
     } else {
@@ -488,7 +566,17 @@ function updateNewCardButtonVisibility() {
     var newCardBtn = document.getElementById('new-card-btn');
     if (!newCardBtn) return;
     
-    if (canOrderNewCard()) {
+    var allCardTypes = ['credit', 'salary', 'currency'];
+    var hasAllCards = true;
+    
+    for (var i = 0; i < allCardTypes.length; i++) {
+        if (userAvailableCards.indexOf(allCardTypes[i]) === -1) {
+            hasAllCards = false;
+            break;
+        }
+    }
+    
+    if (!hasAllCards) {
         newCardBtn.style.display = 'flex';
         newCardBtn.classList.add('visible');
     } else {
@@ -685,6 +773,7 @@ if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
     
     updateCardControlsVisibility();
     applyCardType();
+    updateUIByCardsAvailability()
 
     if (userCardsFullData && Array.isArray(userCardsFullData)) {
         checkAndShowVerificationOnStart();
@@ -710,13 +799,23 @@ if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
 
 async function openOrder() {
     if (isLoadingData) {
-        alert("⏳ Зачекайте, дані завантажуються... Спробуйте за мить.");
+        alert("Зачекайте, дані завантажуються...");
         return;
     }
+    if (!hasAnyCards()) {
+        alert("У вас немає жодної картки!\n\nСпочатку замовте картку через кнопку '+'");
+        return;
+    }
+    if (!hasActiveCreditCard()) {
+        alert("Потрібна активна кредитна картка для оформлення кредиту!\n\nЗамовте або активуйте кредитну картку.");
+        return;
+    }
+    
     if (hasActiveLoan) {
-        alert("❌ У вас вже є активний кредит! Погасіть поточний, щоб оформити новий.");
+        alert("У вас вже є активний кредит!");
         return;
     }
+    
     openModal('order-modal');
 }
 
