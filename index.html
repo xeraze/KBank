@@ -65,7 +65,12 @@
             <div id="pending-label" class="hidden text-[10px] text-white/30 italic mt-3 status-pulse font-bold uppercase">Очікує розгляду...</div>
         </div>
 
-        <div id="card-box">
+        <div class="card-switch-container">
+    <div class="card-arrow" id="prev-card">
+        <i class="fas fa-chevron-left"></i>
+    </div>
+    <div id="card-box">
+       <div id="card-box">
             <div class="k-card">
                 <div class="k-card-inner">
                     <div class="k-card-front">
@@ -103,6 +108,11 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="card-arrow" id="next-card">
+        <i class="fas fa-chevron-right"></i>
+    </div>
+</div>
 
         <div class="grid grid-cols-2 gap-4 mt-8 relative z-30">
             <button onclick="openOrder()" class="bg-white text-black py-4 rounded-2xl font-black uppercase text-[11px] shadow-xl active:scale-95 transition-all">Оформити</button>
@@ -186,7 +196,7 @@
     <div id="tariffs-modal">
         <div class="modal-content !max-w-[500px]">
             <h3 class="text-3xl font-black mb-1 uppercase italic tracking-tighter">Тарифи</h3>
-            <p class="text-[9px] text-gray-500 uppercase font-bold border-b border-white/5 pb-3 mb-6">Згідно з регламентом НБУ та внутрішньою політикою KedraBank</p>
+            <p class="text-[9px] text-gray-500 uppercase font-bold border-b border-white/5 pb-3 mb-6">Згідно з регламентом НБУ та внутрішньою політикою KBank</p>
             <div class="space-y-3 overflow-y-auto max-h-[60vh] pr-2">
                 <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
                     <p class="text-[8px] text-gray-500 uppercase font-black mb-1">Річна процентна ставка (APR)</p>
@@ -269,6 +279,54 @@
         function loginDiscord() {
             window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + window.location.pathname)}&response_type=token&scope=identify`;
         }
+
+let cardTypeIndex = 0;
+const cardTypes = ['credit', 'salary', 'currency'];
+const cardContainer = document.getElementById('card-box')?.parentElement?.parentElement;
+
+const cardWrapper = document.getElementById('card-box');
+
+function applyCardType() {
+    const type = cardTypes[cardTypeIndex];
+    cardBox.classList.remove('credit-card', 'salary-card', 'currency-card');
+    cardBox.classList.add(`${type}-card`);
+    
+    const user = JSON.parse(localStorage.getItem('kbank_user'));
+    const usernameSpan = document.getElementById('card-username');
+    const cvcSpan = document.getElementById('card-cvc');
+    
+    if (usernameSpan && user) {
+        if (type === 'salary') {
+            usernameSpan.innerText = `SALARY ${user.username.toUpperCase()}`;
+        } else if (type === 'currency') {
+            usernameSpan.innerText = `FX ${user.username.toUpperCase()}`;
+        } else {
+            usernameSpan.innerText = user.username.toUpperCase();
+        }
+    }
+    
+    if (cvcSpan && user) {
+        if (type === 'currency') {
+            cvcSpan.innerText = 'USD';
+            cvcSpan.style.fontSize = '10px';
+        } else {
+            let cvc = user.id.toString().slice(-3);
+            cvc = cvc.padStart(3, '0');
+            cvcSpan.innerText = cvc;
+            cvcSpan.style.fontSize = '';
+        }
+    }
+}
+
+document.getElementById('prev-card')?.addEventListener('click', () => {
+    cardTypeIndex = (cardTypeIndex - 1 + cardTypes.length) % cardTypes.length;
+    applyCardType();
+});
+document.getElementById('next-card')?.addEventListener('click', () => {
+    cardTypeIndex = (cardTypeIndex + 1) % cardTypes.length;
+    applyCardType();
+});
+
 
         async function updateUI() {
             const user = JSON.parse(localStorage.getItem('kbank_user'));
@@ -364,14 +422,14 @@
 
             const payload = {
                 embeds: [{
-                    title: "НОВА ЗАЯВКА НА КРЕДИТ",
+                    title: "📋 НОВА ЗАЯВКА НА КРЕДИТ",
                     color: 0xffffff,
                     fields: [
-                        { name: "Клієнт", value: `<@${user.id}> (${user.username})`, inline: false },
-                        { name: "Сума", value: `${amount} ₴`, inline: true },
-                        { name: "Термін", value: `${term} місяці(в)`, inline: true },
-                        { name: "Roblox Nickname", value: nick, inline: true },
-                        { name: "Мета", value: `\`\`\`${purpose.slice(0, 300)}\`\`\`` }
+                        { name: "👤 Клієнт", value: `<@${user.id}> (${user.username})`, inline: false },
+                        { name: "💰 Сума", value: `${amount} ₴`, inline: true },
+                        { name: "📆 Термін", value: `${term} місяці(в)`, inline: true },
+                        { name: "🎮 Roblox Nickname", value: nick, inline: true },
+                        { name: "🎯 Мета", value: `\`\`\`${purpose.slice(0, 300)}\`\`\`` }
                     ],
                     footer: { text: `ID: ${user.id} • ${new Date().toLocaleString('uk-UA')}` }
                 }]
