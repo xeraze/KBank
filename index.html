@@ -349,9 +349,10 @@ function updateUIByCardsAvailability() {
         { selector: '.ops-stub', className: 'ops-stub' },
         { selector: '#prev-card', id: 'prev-card' },
         { selector: '#next-card', id: 'next-card' },
-        { selector: '#card-box', id: 'card-box' },
-        { selector: '.card-switch-container', className: 'card-switch-container' }
+        { selector: '#card-box', id: 'card-box' }
     ];
+    
+    var cardSwitchContainer = document.querySelector('.card-switch-container');
     
     if (!hasCards) {
         elementsToHide.forEach(function(item) {
@@ -361,12 +362,19 @@ function updateUIByCardsAvailability() {
             }
         });
         
-        showNoCardsMessage(true);
-        
-        var newCardBtn = document.getElementById('new-card-btn');
-        if (newCardBtn) {
-            newCardBtn.style.display = 'flex';
+        if (cardSwitchContainer) {
+            var newCardBtn = document.getElementById('new-card-btn');
+            cardSwitchContainer.style.display = 'flex';
+            cardSwitchContainer.style.justifyContent = 'center';
+            
+            var prevCard = document.getElementById('prev-card');
+            var nextCard = document.getElementById('next-card');
+            if (prevCard) prevCard.style.display = 'none';
+            if (nextCard) nextCard.style.display = 'none';
+            if (newCardBtn) newCardBtn.style.display = 'flex';
         }
+        
+        showNoCardsMessage(true);
         
         var creditStatus = document.getElementById('credit-card-status');
         if (creditStatus) creditStatus.style.display = 'none';
@@ -379,9 +387,19 @@ function updateUIByCardsAvailability() {
             }
         });
         
+        if (cardSwitchContainer) {
+            cardSwitchContainer.style.display = 'flex';
+            cardSwitchContainer.style.justifyContent = 'center';
+            
+            var prevCard = document.getElementById('prev-card');
+            var nextCard = document.getElementById('next-card');
+            if (prevCard) prevCard.style.display = '';
+            if (nextCard) nextCard.style.display = '';
+        }
         showNoCardsMessage(false);
         
         updateArrowsVisibility();
+        updateNewCardButtonVisibility();
     }
 }
 
