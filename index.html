@@ -232,7 +232,25 @@
             <button onclick="closeModal('tariffs-modal')" class="w-full bg-white text-black py-5 rounded-3xl mt-8 font-black uppercase text-xs tracking-widest hover:bg-gray-200 transition-colors">Ознайомлений(а)</button>
         </div>
     </div>
-
+    <div id="verification-modal">
+    <div class="verification-content">
+        <div class="verification-icon">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        <h3 class="text-2xl font-black uppercase italic mb-2 text-white">Верифікація картки</h3>
+        <p class="text-gray-300 text-sm mb-4" id="verification-card-name"></p>
+        <p class="text-gray-400 text-xs mb-4">Для активації цієї картки потрібно пройти відеопідтвердження з адміністратором банку.</p>
+        <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3 mb-4">
+            <p class="text-yellow-500 text-[10px] font-black uppercase">Час очікування: ~5-10 хвилин</p>
+        </div>
+        <a id="meet-link-btn" href="#" target="_blank" class="btn-verify">
+            <i class="fab fa-google"></i> Перейти в Google Meet
+        </a>
+        <button onclick="closeModal('verification-modal')" class="w-full text-[10px] font-bold text-gray-500 uppercase mt-4 hover:text-white transition-colors">
+            Закрити
+        </button>
+    </div>
+</div>
     <script>
         const CLIENT_ID = '1488509930485841961';
 const WEBHOOK_URL = 'https://discord.com/api/webhooks/1488505884756938793/nx9kc5t7JlQAqN1cfIYraiTJqbOVaz5F-n1qZh-u-DPiW3VJ_4qE7BYCK_UKta-mDtjt';
@@ -243,6 +261,8 @@ let currentCardIndexInAvailable = 0;
 let hasActiveLoan = false;
 let isLoadingData = true;
 let touchStartX = 0, touchEndX = 0, isSwiping = false;
+let currentCardData = null;
+let isVerificationRequired = false;
 
 function openModal(id) { 
     var modal = document.getElementById(id);
@@ -271,6 +291,43 @@ function getCardCvc(userId, type) {
     if (type === 'salary') return ((last3Num + 321) % 1000).toString().padStart(3, '0');
     if (type === 'currency') return ((last3Num + 555) % 1000).toString().padStart(3, '0');
     return last3.padStart(3, '0');
+}
+
+        // Перевірка статусу картки
+function checkCardVerificationStatus(cardType, userCardsArray) {
+    if (!userCardsArray || !Array.isArray(userCardsArray)) return null;
+    
+    for (var i = 0; i < userCardsArray.length; i++) {
+        if (userCardsArray[i].type === cardType) {
+            return userCardsArray[i];
+        }
+    }
+    return null;
+}
+
+function showVerificationModal(cardType, meetLink) {
+    var cardNames = {
+        'credit': 'Кредитна картка',
+        'salary': 'Зарплатна картка',
+        'currency': 'Валютна картка'
+    };
+    
+    var cardNameSpan = document.getElementById('verification-card-name');
+    var meetLinkBtn = document.getElementById('meet-link-btn');
+    
+    if (cardNameSpan) cardNameSpan.innerText = cardNames[cardType] || cardType;
+    if (meetLinkBtn) meetLinkBtn.href = meetLink;
+    
+    openModal('verification-modal');
+}
+
+function checkCurrentCardVerification() {
+    if (currentCardData && currentCardData.status === 'verification' && currentCardData.meetLink) {
+        isVerificationRequired = true;
+        return true;
+    }
+    isVerificationRequired = false;
+    return false;
 }
 
 function applyCardType(animateDirection) {
@@ -316,6 +373,36 @@ function applyCardType(animateDirection) {
         setTimeout(function() {
             cardBox.classList.remove('card-animate-' + animateDirection);
         }, 300);
+    }
+}
+        async function loadCardData() {
+    var user = JSON.parse(localStorage.getItem('kbank_user'));
+    if (!user) return;
+    
+    try {
+        var res = await fetch(JSON_URL + '?t=' + Date.now());
+        var db = await res.json();
+        var dbUser = null;
+        
+        for (var i = 0; i < db.users.length; i++) {
+            if (String(db.users[i].id) === String(user.id)) {
+                dbUser = db.users[i];
+                break;
+            }
+        }
+        
+        if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
+            var currentType = userAvailableCards[currentCardIndexInAvailable];
+            
+            for (var i = 0; i < dbUser.cards.length; i++) {
+                if (dbUser.cards[i].type === currentType) {
+                    currentCardData = dbUser.cards[i];
+                    break;
+                }
+            }
+        }
+    } catch(e) {
+        console.error("Помилка завантаження даних картки:", e);
     }
 }
 
@@ -376,6 +463,64 @@ function addSwipeAnimation(direction) {
             cardBox.style.transition = '';
         }, 300);
     }, 150);
+}
+
+        function applyCardType(animateDirection) {
+    var cardBox = document.getElementById('card-box');
+    if (!cardBox || userAvailableCards.length === 0) return;
+    if (currentCardIndexInAvailable >= userAvailableCards.length) {
+        currentCardIndexInAvailable = 0;
+    }
+    
+    var type = userAvailableCards[currentCardIndexInAvailable];
+    cardBox.classList.remove('credit-card', 'salary-card', 'currency-card');
+    cardBox.classList.add(type + '-card');
+    
+    var user = JSON.parse(localStorage.getItem('kbank_user'));
+    if (!user) return;
+    
+    var fullDb = null;
+    
+    var usernameSpan = document.getElementById('card-username');
+    var cvcSpan = document.getElementById('card-cvc');
+    var cardNumSpan = document.getElementById('card_num_display');
+    
+    if (usernameSpan) {
+        if (type === 'salary') {
+            usernameSpan.innerText = 'SALARY ' + user.username.toUpperCase();
+        } else if (type === 'currency') {
+            usernameSpan.innerText = 'FX ' + user.username.toUpperCase();
+        } else {
+            usernameSpan.innerText = user.username.toUpperCase();
+        }
+    }
+    
+    if (cardNumSpan) {
+        cardNumSpan.innerText = getCardNumber(user.id, type);
+    }
+    
+    if (cvcSpan) {
+        cvcSpan.innerText = getCardCvc(user.id, type);
+        cvcSpan.style.fontSize = '';
+    }
+    
+    var existingBadge = cardBox.querySelector('.card-verification-badge');
+    if (existingBadge) existingBadge.remove();
+            
+    if (currentCardData && currentCardData.status === 'verification') {
+        var badge = document.createElement('div');
+        badge.className = 'card-verification-badge';
+        badge.innerHTML = '<i class="fas fa-shield-alt mr-1"></i> Перевірка';
+        cardBox.style.position = 'relative';
+        cardBox.appendChild(badge);
+    }
+    
+    if (animateDirection) {
+        cardBox.classList.add('card-animate-' + animateDirection);
+        setTimeout(function() {
+            cardBox.classList.remove('card-animate-' + animateDirection);
+        }, 300);
+    }
 }
 
 async function updateUI() {
@@ -451,6 +596,19 @@ async function updateUI() {
     } finally {
         isLoadingData = false;
     }
+
+    var userCardsData = null;
+if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
+    if (dbUser.cards.length > 0 && typeof dbUser.cards[0] === 'object') {
+        userCardsData = dbUser.cards;
+        userAvailableCards = [];
+        for (var i = 0; i < userCardsData.length; i++) {
+            userAvailableCards.push(userCardsData[i].type);
+        }
+    } else {
+        userAvailableCards = dbUser.cards;
+    }
+}
     
     if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
         userAvailableCards = dbUser.cards;
@@ -731,21 +889,23 @@ window.onload = async function() {
         var newCardBtn = document.getElementById('new-card-btn');
         
         if (prevBtn) {
-            prevBtn.onclick = function() {
-                if (userAvailableCards.length <= 1) return;
-                currentCardIndexInAvailable = (currentCardIndexInAvailable - 1 + userAvailableCards.length) % userAvailableCards.length;
-                applyCardType('right');
-                addSwipeAnimation('right');
-            };
-        }
-        if (nextBtn) {
-            nextBtn.onclick = function() {
-                if (userAvailableCards.length <= 1) return;
-                currentCardIndexInAvailable = (currentCardIndexInAvailable + 1) % userAvailableCards.length;
-                applyCardType('left');
-                addSwipeAnimation('left');
-            };
-        }
+    prevBtn.onclick = async function() {
+        if (userAvailableCards.length <= 1) return;
+        currentCardIndexInAvailable = (currentCardIndexInAvailable - 1 + userAvailableCards.length) % userAvailableCards.length;
+        await loadCardData();
+        applyCardType('right');
+        addSwipeAnimation('right');
+    };
+}
+if (nextBtn) {
+    nextBtn.onclick = async function() {
+        if (userAvailableCards.length <= 1) return;
+        currentCardIndexInAvailable = (currentCardIndexInAvailable + 1) % userAvailableCards.length;
+        await loadCardData();
+        applyCardType('left');
+        addSwipeAnimation('left');
+    };
+}
         if (newCardBtn) newCardBtn.onclick = function() { openCardRequestModal(); };
         
         var cardBox = document.getElementById('card-box');
