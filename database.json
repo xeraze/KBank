@@ -6,9 +6,7 @@
       "status": "paid", 
       "term": "8",
       "cards": [
-        {"type": "credit", "status": "active"},
-        {"type": "salary", "status": "verification", "meetLink": "https://meet.google.com/abc-defg-hij"},
-        {"type": "currency", "status": "pending"}
+
       ]
     },
     { 
