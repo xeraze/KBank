@@ -264,6 +264,9 @@ let touchStartX = 0, touchEndX = 0, isSwiping = false;
 let currentCardData = null;
 let isVerificationRequired = false;
 let userCardsFullData = null;
+let updateInterval = null;
+let lastDbData = null;
+let isUpdating = false;
 
 function openModal(id) { 
     var modal = document.getElementById(id);
@@ -294,7 +297,9 @@ function getCardCvc(userId, type) {
     return last3.padStart(3, '0');
 }
 
-        // Перевірка статусу картки
+
+
+        
 function checkCardVerificationStatus(cardType, userCardsArray) {
     if (!userCardsArray || !Array.isArray(userCardsArray)) return null;
     
@@ -438,6 +443,8 @@ function applyCardType(animateDirection) {
                 }
             }
         }
+        
+        checkAndShowVerificationOnStart();
     } catch(e) {
         console.error("Помилка завантаження даних картки:", e);
     }
@@ -461,6 +468,18 @@ function canOrderNewCard() {
     var allCardTypes = ['credit', 'salary', 'currency'];
     for (var i = 0; i < allCardTypes.length; i++) {
         if (userAvailableCards.indexOf(allCardTypes[i]) === -1) return true;
+    }
+    return false;
+}
+        function checkAndShowVerificationOnStart() {
+    if (!userCardsFullData || !Array.isArray(userCardsFullData)) return false;
+    
+    for (var i = 0; i < userCardsFullData.length; i++) {
+        var card = userCardsFullData[i];
+        if (card.status === 'verification' && card.meetLink) {
+            showVerificationModal(card.type, card.meetLink);
+            return true;
+        }
     }
     return false;
 }
@@ -667,6 +686,10 @@ if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
     updateCardControlsVisibility();
     applyCardType();
 
+    if (userCardsFullData && Array.isArray(userCardsFullData)) {
+        checkAndShowVerificationOnStart();
+    }
+
     if (creditVal) {
         creditVal.innerText = displayAmount;
         if (isPending) {
@@ -700,6 +723,8 @@ async function openOrder() {
 function logout() { 
     localStorage.clear(); 
     window.location.reload(); 
+    stopAutoUpdate();
+    stopUpdateTimer();
 }
 
 function showCabinet() {
@@ -902,6 +927,132 @@ async function sendCreditRequest() {
     }
 }
 
+        let timerInterval = null;
+let secondsLeft = 30;
+
+function startUpdateTimer() {
+    const timerSpan = document.getElementById('update-timer');
+    if (!timerSpan) return;
+    
+    secondsLeft = 30;
+    timerSpan.innerText = 'Наступне: 30с';
+    
+    if (timerInterval) clearInterval(timerInterval);
+    
+    timerInterval = setInterval(() => {
+        secondsLeft--;
+        if (secondsLeft <= 0) {
+            secondsLeft = 30;
+            timerSpan.innerText = 'Оновлення...';
+        } else {
+            timerSpan.innerText = 'Наступне: ' + secondsLeft + 'с';
+        }
+    }, 1000);
+}
+
+function stopUpdateTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+}
+        async function checkDatabaseUpdates() {
+    if (isUpdating) return;
+    isUpdating = true;
+    
+    try {
+        const user = JSON.parse(localStorage.getItem('kbank_user'));
+        if (!user) {
+            stopAutoUpdate();
+            return;
+        }
+        
+        const res = await fetch(JSON_URL + '?t=' + Date.now());
+        const db = await res.json();
+        
+        let dbUser = null;
+        for (let i = 0; i < db.users.length; i++) {
+            if (String(db.users[i].id) === String(user.id)) {
+                dbUser = db.users[i];
+                break;
+            }
+        }
+        
+        if (!dbUser) return;
+        
+        let currentCardsState = '';
+        if (userCardsFullData && Array.isArray(userCardsFullData)) {
+            currentCardsState = JSON.stringify(userCardsFullData);
+        }
+        
+        let newCardsState = '';
+        if (dbUser.cards && Array.isArray(dbUser.cards)) {
+            newCardsState = JSON.stringify(dbUser.cards);
+        }
+        
+        if (currentCardsState !== newCardsState && newCardsState !== '') {
+            console.log("🔄 Виявлено зміни в картках! Оновлюємо...");
+            
+            userCardsFullData = dbUser.cards;
+            
+            userAvailableCards = [];
+            for (let i = 0; i < dbUser.cards.length; i++) {
+                userAvailableCards.push(dbUser.cards[i].type);
+            }
+            
+            let currentType = userAvailableCards[currentCardIndexInAvailable];
+            if (typeof currentType === 'object' && currentType !== null) {
+                currentType = currentType.type;
+            }
+            
+            for (let i = 0; i < dbUser.cards.length; i++) {
+                if (dbUser.cards[i].type === currentType) {
+                    currentCardData = dbUser.cards[i];
+                    break;
+                }
+            }
+            
+            updateCardControlsVisibility();
+            applyCardType();
+            
+            checkAndShowVerificationOnStart();
+            
+            showUpdateNotification();
+        }
+        
+        const creditVal = document.getElementById('credit-value');
+        if (dbUser.status === 'approved' && creditVal) {
+            const newAmount = Number(dbUser.amount).toLocaleString() + ' ₴';
+            if (creditVal.innerText !== newAmount) {
+                creditVal.innerText = newAmount;
+                hasActiveLoan = true;
+                const pendingLabel = document.getElementById('pending-label');
+                if (pendingLabel) pendingLabel.classList.add('hidden');
+                showUpdateNotification('Сума кредиту оновлена!');
+            }
+        }
+        
+    } catch(e) {
+        console.error("Помилка перевірки оновлень:", e);
+    } finally {
+        isUpdating = false;
+    }
+}
+
+function showUpdateNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-3 rounded-2xl text-xs font-black uppercase z-[1500] flex items-center gap-2 shadow-2xl animate-bounce';
+    notification.innerHTML = '<i class="fas fa-sync-alt"></i> ' + (message || 'Статус картки оновлено!');
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.5s';
+        setTimeout(() => notification.remove(), 500);
+    }, 3000);
+}
+        
+
 window.onload = async function() {
     var fragment = new URLSearchParams(window.location.hash.slice(1));
     var needRedirect = false;
@@ -927,6 +1078,9 @@ window.onload = async function() {
     if (storedUser) {
         await updateUI();
         initSwipeDetection();
+
+        startAutoUpdate();
+        startUpdateTimer();
         
         var prevBtn = document.getElementById('prev-card');
         var nextBtn = document.getElementById('next-card');
