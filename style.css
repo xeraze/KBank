@@ -391,3 +391,21 @@
 #new-card-btn {
     transition: all 0.2s ease;
 }
+
+#qr-code-container {
+    background: white;
+    border-radius: 20px;
+    padding: 8px;
+    display: inline-flex;
+    margin: 0 auto;
+}
+
+#qr-canvas, #qr-image {
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+#qr-spinner {
+    background: white;
+    border-radius: 16px;
+}
