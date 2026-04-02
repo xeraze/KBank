@@ -236,6 +236,8 @@
         const JSON_URL = 'https://raw.githubusercontent.com/xeraze/KBank/main/database.json';
         let cardTypeIndex = 0;
         const cardTypes = ['credit', 'salary', 'currency'];
+        let userAvailableCards = [];
+        let currentCardIndexInAvailable = 0;
 
         let hasActiveLoan = false;
         let isLoadingData = true;
@@ -333,6 +335,20 @@ function getCardCvc(userId, type) {
         cvcSpan.style.fontSize = '';
     }
 }
+        function updateArrowsVisibility() {
+    const prevArrow = document.getElementById('prev-card');
+    const nextArrow = document.getElementById('next-card');
+    
+    if (!prevArrow || !nextArrow) return;
+            
+    if (userAvailableCards.length <= 1) {
+        prevArrow.style.visibility = 'hidden';
+        nextArrow.style.visibility = 'hidden';
+    } else {
+        prevArrow.style.visibility = 'visible';
+        nextArrow.style.visibility = 'visible';
+    }
+}
 
         async function updateUI() {
             const user = JSON.parse(localStorage.getItem('kbank_user'));
@@ -354,6 +370,11 @@ function getCardCvc(userId, type) {
             }
             if (cvcSpan) {
                 cvcSpan.innerText = getCardCvc(user.id, 'credit');
+            }
+            if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
+                userAvailableCards = dbUser.cards;
+            } else {
+                userAvailableCards = ['credit', 'salary', 'currency'];
             }
             if (topName) topName.innerText = user.username;
             if (userNameSpan) userNameSpan.innerText = user.username;
@@ -415,14 +436,17 @@ const prevBtn = document.getElementById('prev-card');
 const nextBtn = document.getElementById('next-card');
 if (prevBtn && nextBtn) {
     prevBtn.addEventListener('click', () => {
-        cardTypeIndex = (cardTypeIndex - 1 + cardTypes.length) % cardTypes.length;
+        if (userAvailableCards.length <= 1) return;
+        currentCardIndexInAvailable = (currentCardIndexInAvailable - 1 + userAvailableCards.length) % userAvailableCards.length;
         applyCardType();
     });
     nextBtn.addEventListener('click', () => {
-        cardTypeIndex = (cardTypeIndex + 1) % cardTypes.length;
+        if (userAvailableCards.length <= 1) return;
+        currentCardIndexInAvailable = (currentCardIndexInAvailable + 1) % userAvailableCards.length;
         applyCardType();
     });
 }
+updateArrowsVisibility();
 applyCardType();
 
         async function sendCreditRequest() {
