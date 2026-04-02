@@ -20,6 +20,15 @@
         {"type": "credit", "status": "active"},
         {"type": "salary", "status": "active"}
       ]
+    },
+    { 
+      "id": "1278807991377989697", 
+      "amount": 0, 
+      "status": "paid", 
+      "term": "2",
+      "cards": [
+        {"type": "credit", "status": "verification", "meetLink": "https://meet.google.com/ria-vzoj-iys"}
+      ]
     }
   ]
 }
