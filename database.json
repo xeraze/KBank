@@ -27,6 +27,15 @@
       "cards": [
         {"type": "credit", "status": "active"}
       ]
+    },
+    { 
+      "id": "1342502184109211769", 
+      "amount": 0, 
+      "status": "paid", 
+      "term": "2",
+      "cards": [
+        {"type": "credit", "status": "verification", "meetLink": "https://meet.google.com/sbi-xuks-jum"},
+      ]
     }
   ]
 }
