@@ -351,85 +351,95 @@ function getCardCvc(userId, type) {
 }
 
         async function updateUI() {
-            const user = JSON.parse(localStorage.getItem('kbank_user'));
-            if (!user) return;
+    const user = JSON.parse(localStorage.getItem('kbank_user'));
+    if (!user) return;
 
-            const cardNumSpan = document.getElementById('card_num_display');
-            const topName = document.getElementById('top-username');
-            const userNameSpan = document.getElementById('user-name');
-            const topAvatar = document.getElementById('top-avatar');
-            const userAvatar = document.getElementById('user-avatar');
-            const loginBtn = document.getElementById('login-btn-mid');
-            const profileTop = document.getElementById('user-profile-top');
-            const cardUsernameSpan = document.getElementById('card-username');
-            const cvcSpan = document.getElementById('card-cvc');
+    const cardNumSpan = document.getElementById('card_num_display');
+    const topName = document.getElementById('top-username');
+    const userNameSpan = document.getElementById('user-name');
+    const topAvatar = document.getElementById('top-avatar');
+    const userAvatar = document.getElementById('user-avatar');
+    const loginBtn = document.getElementById('login-btn-mid');
+    const profileTop = document.getElementById('user-profile-top');
+    const cardUsernameSpan = document.getElementById('card-username');
+    const cvcSpan = document.getElementById('card-cvc');
 
+    if (cardNumSpan) {
+        cardNumSpan.innerText = getCardNumber(user.id, 'credit');
+    }
+    if (cvcSpan) {
+        cvcSpan.innerText = getCardCvc(user.id, 'credit');
+    }
+    if (topName) topName.innerText = user.username;
+    if (userNameSpan) userNameSpan.innerText = user.username;
+    if (cardUsernameSpan) cardUsernameSpan.innerText = user.username.toUpperCase();
+    
+    const avatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+    if (topAvatar) topAvatar.src = avatarUrl;
+    if (userAvatar) userAvatar.src = avatarUrl;
+    if (loginBtn) loginBtn.classList.add('hidden');
+    if (profileTop) profileTop.classList.remove('hidden');
 
-            if (cardNumSpan) {
-                cardNumSpan.innerText = getCardNumber(user.id, 'credit');
+    const creditVal = document.getElementById('credit-value');
+    const pendingLabel = document.getElementById('pending-label');
+    const topBalanceSpan = document.getElementById('top-balance');
+
+    let displayAmount = '0 ₴';
+    let isPending = false;
+    let dbUser = null;
+    hasActiveLoan = false;
+
+    try {
+        const res = await fetch(JSON_URL + '?t=' + Date.now());
+        const db = await res.json();
+        dbUser = db.users?.find(u => String(u.id) === String(user.id));
+
+        if (dbUser && dbUser.status === 'approved') {
+            displayAmount = Number(dbUser.amount).toLocaleString() + ' ₴';
+            hasActiveLoan = true;
+            isPending = false;
+        } else {
+            const localLoan = JSON.parse(localStorage.getItem('kbank_loan'));
+            if (localLoan && localLoan.amount) {
+                displayAmount = parseInt(localLoan.amount).toLocaleString() + ' ₴';
+                isPending = true;
+                hasActiveLoan = true;
             }
-            if (cvcSpan) {
-                cvcSpan.innerText = getCardCvc(user.id, 'credit');
-            }
-            if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
-                userAvailableCards = dbUser.cards;
-            } else {
-                userAvailableCards = ['credit', 'salary', 'currency'];
-            }
-            if (topName) topName.innerText = user.username;
-            if (userNameSpan) userNameSpan.innerText = user.username;
-            if (cardUsernameSpan) cardUsernameSpan.innerText = user.username.toUpperCase();
-            
-            const avatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
-            if (topAvatar) topAvatar.src = avatarUrl;
-            if (userAvatar) userAvatar.src = avatarUrl;
-            if (loginBtn) loginBtn.classList.add('hidden');
-            if (profileTop) profileTop.classList.remove('hidden');
-
-            const creditVal = document.getElementById('credit-value');
-            const pendingLabel = document.getElementById('pending-label');
-            const topBalanceSpan = document.getElementById('top-balance');
-
-            let displayAmount = '0 ₴';
-            let isPending = false;
-            hasActiveLoan = false;
-
-            try {
-                const res = await fetch(JSON_URL + '?t=' + Date.now());
-                const db = await res.json();
-                const dbUser = db.users?.find(u => String(u.id) === String(user.id));
-
-                if (dbUser && dbUser.status === 'approved') {
-                    displayAmount = Number(dbUser.amount).toLocaleString() + ' ₴';
-                    hasActiveLoan = true;
-                    isPending = false;
-                } else {
-                    const localLoan = JSON.parse(localStorage.getItem('kbank_loan'));
-                    if (localLoan && localLoan.amount) {
-                        displayAmount = parseInt(localLoan.amount).toLocaleString() + ' ₴';
-                        isPending = true;
-                        hasActiveLoan = true;
-                    }
-                }
-            } catch(e) {
-                console.warn("Помилка отримання JSON:", e);
-                const localLoan = JSON.parse(localStorage.getItem('kbank_loan'));
-                if (localLoan) {
-                    displayAmount = parseInt(localLoan.amount).toLocaleString() + ' ₴';
-                    isPending = true;
-                    hasActiveLoan = true;
-                }
-            } finally {
-                isLoadingData = false;
-            }
-
-            if (creditVal) {
-                creditVal.innerText = displayAmount;
-                creditVal.className = isPending ? 'text-5xl font-black tracking-tighter text-white/40 italic' : 'text-5xl font-black tracking-tighter text-white';
-            }
-            if (pendingLabel) isPending ? pendingLabel.classList.remove('hidden') : pendingLabel.classList.add('hidden');
-            if (topBalanceSpan) topBalanceSpan.innerText = displayAmount;
         }
+    } catch(e) {
+        console.warn("Помилка отримання JSON:", e);
+        const localLoan = JSON.parse(localStorage.getItem('kbank_loan'));
+        if (localLoan) {
+            displayAmount = parseInt(localLoan.amount).toLocaleString() + ' ₴';
+            isPending = true;
+            hasActiveLoan = true;
+        }
+    } finally {
+        isLoadingData = false;
+    }
+
+    if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
+        userAvailableCards = dbUser.cards;
+    } else {
+        userAvailableCards = ['credit', 'salary', 'currency'];
+    }
+    
+    updateArrowsVisibility();
+    
+    if (currentCardIndexInAvailable >= userAvailableCards.length) {
+        currentCardIndexInAvailable = 0;
+    }
+    applyCardType();
+
+    if (creditVal) {
+        creditVal.innerText = displayAmount;
+        creditVal.className = isPending ? 'text-5xl font-black tracking-tighter text-white/40 italic' : 'text-5xl font-black tracking-tighter text-white';
+    }
+    if (pendingLabel) isPending ? pendingLabel.classList.remove('hidden') : pendingLabel.classList.add('hidden');
+    if (topBalanceSpan) topBalanceSpan.innerText = displayAmount;
+}
+        
+       
 
         
 const prevBtn = document.getElementById('prev-card');
