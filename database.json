@@ -5,9 +5,7 @@
       "amount": 1488, 
       "status": "paid", 
       "term": "8",
-      "cards": [
-        
-      ]
+      "cards": []
     },
     { 
       "id": "1404735389603860503", 
@@ -34,7 +32,7 @@
       "status": "paid", 
       "term": "2",
       "cards": [
-        {"type": "credit", "status": "verification", "meetLink": "https://meet.google.com/sbi-xuks-jum"},
+        {"type": "credit", "status": "verification", "meetLink": "https://meet.google.com/sbi-xuks-jum"}
       ]
     }
   ]
