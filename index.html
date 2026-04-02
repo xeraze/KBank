@@ -293,20 +293,28 @@
     const user = JSON.parse(localStorage.getItem('kbank_user'));
     if (!user) return;
 
-    const last4 = user.id.toString().slice(-4); 
-    document.getElementById('card_num_display').innerText = last4;
-    document.getElementById('card-holder-name').innerText = user.username;
+    if (document.getElementById('card_num_display')) {
+        const last4 = user.id.toString().slice(-4); 
+        document.getElementById('card_num_display').innerText = last4;
+    }
 
-    document.getElementById('login-btn-mid').classList.add('hidden');
-    document.getElementById('user-profile-top').classList.remove('hidden');
-    document.getElementById('top-username').innerText = user.username;
-    document.getElementById('top-avatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+    const loginBtn = document.getElementById('login-btn-mid');
+    const profileTop = document.getElementById('user-profile-top');
+    
+    if (loginBtn) loginBtn.classList.add('hidden');
+    if (profileTop) profileTop.classList.remove('hidden');
 
-    document.getElementById('user-name').innerText = user.username;
-    document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+    if (document.getElementById('top-username')) document.getElementById('top-username').innerText = user.username;
+    if (document.getElementById('user-name')) document.getElementById('user-name').innerText = user.username;
+    
+    const avatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+    if (document.getElementById('top-avatar')) document.getElementById('top-avatar').src = avatarUrl;
+    if (document.getElementById('user-avatar')) document.getElementById('user-avatar').src = avatarUrl;
 
     const val = document.getElementById('credit-value');
     const lbl = document.getElementById('pending-label');
+    if (!val || !lbl) return;
+
     hasActiveLoan = false;
 
     try {
