@@ -238,6 +238,9 @@
         const cardTypes = ['credit', 'salary', 'currency'];
         let userAvailableCards = ['credit', 'salary', 'currency'];
         let currentCardIndexInAvailable = 0;
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let isSwiping = false;
 
         let hasActiveLoan = false;
         let isLoadingData = true;
@@ -302,7 +305,7 @@ function getCardCvc(userId, type) {
             window.location.href = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(window.location.origin + window.location.pathname)}&response_type=token&scope=identify`;
         }
 
-        function applyCardType() {
+        function applyCardType(animateDirection = null) {
     const cardBox = document.getElementById('card-box');
     if (!cardBox) return;
     
@@ -340,6 +343,12 @@ function getCardCvc(userId, type) {
     if (cvcSpan) {
         cvcSpan.innerText = getCardCvc(user.id, type);
         cvcSpan.style.fontSize = '';
+    }
+    if (animateDirection) {
+        cardBox.classList.add(`card-animate-${animateDirection}`);
+        setTimeout(() => {
+            cardBox.classList.remove(`card-animate-${animateDirection}`);
+        }, 300);
     }
 }
        function updateArrowsVisibility() {
@@ -460,18 +469,107 @@ const prevBtn = document.getElementById('prev-card');
 const nextBtn = document.getElementById('next-card');
 if (prevBtn && nextBtn) {
     prevBtn.addEventListener('click', () => {
-        if (userAvailableCards.length <= 1) return;
-        currentCardIndexInAvailable = (currentCardIndexInAvailable - 1 + userAvailableCards.length) % userAvailableCards.length;
-        applyCardType();
-    });
-    nextBtn.addEventListener('click', () => {
-        if (userAvailableCards.length <= 1) return;
-        currentCardIndexInAvailable = (currentCardIndexInAvailable + 1) % userAvailableCards.length;
-        applyCardType();
-    });
+    if (userAvailableCards.length <= 1) return;
+    currentCardIndexInAvailable = (currentCardIndexInAvailable - 1 + userAvailableCards.length) % userAvailableCards.length;
+    applyCardType('right');
+    addSwipeAnimation('right');
+});
+
+nextBtn.addEventListener('click', () => {
+    if (userAvailableCards.length <= 1) return;
+    currentCardIndexInAvailable = (currentCardIndexInAvailable + 1) % userAvailableCards.length;
+    applyCardType('left');
+    addSwipeAnimation('left');
+});
 }
 updateArrowsVisibility();
 applyCardType();
+
+        function initSwipeDetection() {
+    const cardBox = document.getElementById('card-box');
+    if (!cardBox) return;
+    
+    cardBox.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        isSwiping = true;
+    }, { passive: true });
+    
+    cardBox.addEventListener('touchend', (e) => {
+        if (!isSwiping) return;
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+        isSwiping = false;
+    });
+    
+    // Для миші (десктоп) - можна додати драг
+    let mouseStartX = 0;
+    let isDragging = false;
+    
+    cardBox.addEventListener('mousedown', (e) => {
+        mouseStartX = e.clientX;
+        isDragging = true;
+    });
+    
+    cardBox.addEventListener('mouseup', (e) => {
+        if (!isDragging) return;
+        const mouseEndX = e.clientX;
+        const diff = mouseEndX - mouseStartX;
+        if (Math.abs(diff) > 50) {
+            if (diff > 0) {
+                if (userAvailableCards.length <= 1) return;
+                currentCardIndexInAvailable = (currentCardIndexInAvailable - 1 + userAvailableCards.length) % userAvailableCards.length;
+                applyCardType();
+                addSwipeAnimation(diff > 0 ? 'right' : 'left');
+            } else {
+                if (userAvailableCards.length <= 1) return;
+                currentCardIndexInAvailable = (currentCardIndexInAvailable + 1) % userAvailableCards.length;
+                applyCardType();
+                addSwipeAnimation('left');
+            }
+        }
+        isDragging = false;
+    });
+    
+    cardBox.addEventListener('mouseleave', () => {
+        isDragging = false;
+    });
+}
+
+function handleSwipe() {
+    const diff = touchEndX - touchStartX;
+    if (Math.abs(diff) < 50) return;
+    
+    if (diff > 0) {
+        if (userAvailableCards.length <= 1) return;
+        currentCardIndexInAvailable = (currentCardIndexInAvailable - 1 + userAvailableCards.length) % userAvailableCards.length;
+        applyCardType();
+        addSwipeAnimation('right');
+    } else {
+        if (userAvailableCards.length <= 1) return;
+        currentCardIndexInAvailable = (currentCardIndexInAvailable + 1) % userAvailableCards.length;
+        applyCardType();
+        addSwipeAnimation('left');
+    }
+}
+
+function addSwipeAnimation(direction) {
+    const cardBox = document.getElementById('card-box');
+    if (!cardBox) return;
+    
+    cardBox.style.transition = 'transform 0.3s ease-out';
+    if (direction === 'left') {
+        cardBox.style.transform = 'translateX(-30px) rotate(-2deg)';
+    } else {
+        cardBox.style.transform = 'translateX(30px) rotate(2deg)';
+    }
+    
+    setTimeout(() => {
+        cardBox.style.transform = '';
+        setTimeout(() => {
+            cardBox.style.transition = '';
+        }, 300);
+    }, 150);
+}
 
         async function sendCreditRequest() {
             const amount = document.getElementById('loan-amount').value;
@@ -548,6 +646,7 @@ applyCardType();
                 document.getElementById('view-cabinet').classList.add('hidden');
             }
         };
+        initSwipeDetection();
 
         window.updateUI = updateUI;
     </script>
