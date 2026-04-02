@@ -43,8 +43,12 @@
       "cards": [
         {
           "type": "credit",
-          "status": "verification",
-          "meetLink": "https://meet.google.com/sbi-xuks-jum"
+          "status": "active"
+        },
+        {
+          "type": "salary", 
+          "status": "verification", 
+          "meetLink": "https://meet.google.com/fmp-snmt-ivu"
         }
       ]
     }
