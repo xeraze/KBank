@@ -243,6 +243,26 @@
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
+function getCardNumber(userId, type) {
+    const idStr = userId.toString();
+    const last4 = idStr.slice(-4);
+    const last4Num = parseInt(last4);
+    if (type === 'credit') return `4824 **** **** ${last4}`;
+    if (type === 'salary') return `5234 **** **** ${((last4Num + 1234) % 10000).toString().padStart(4, '0')}`;
+    if (type === 'currency') return `4213 **** **** ${((last4Num + 5678) % 10000).toString().padStart(4, '0')}`;
+    return `4824 **** **** ${last4}`;
+}
+
+function getCardCvc(userId, type) {
+    const idStr = userId.toString();
+    const last3 = idStr.slice(-3);
+    const last3Num = parseInt(last3);
+    if (type === 'credit') return last3.padStart(3, '0');
+    if (type === 'salary') return ((last3Num + 321) % 1000).toString().padStart(3, '0');
+    if (type === 'currency') return ((last3Num + 555) % 1000).toString().padStart(3, '0');
+    return last3.padStart(3, '0');
+}
+        
         async function openOrder() {
             if (isLoadingData) {
                 alert("⏳ Зачекайте, дані завантажуються... Спробуйте за мить.");
@@ -288,10 +308,13 @@
     cardBox.classList.add(`${type}-card`);
     
     const user = JSON.parse(localStorage.getItem('kbank_user'));
+    if (!user) return;
+    
     const usernameSpan = document.getElementById('card-username');
     const cvcSpan = document.getElementById('card-cvc');
+    const cardNumSpan = document.getElementById('card_num_display');
     
-    if (usernameSpan && user) {
+    if (usernameSpan) {
         if (type === 'salary') {
             usernameSpan.innerText = `SALARY ${user.username.toUpperCase()}`;
         } else if (type === 'currency') {
@@ -300,6 +323,16 @@
             usernameSpan.innerText = user.username.toUpperCase();
         }
     }
+    
+    if (cardNumSpan) {
+        cardNumSpan.innerText = getCardNumber(user.id, type);
+    }
+    
+    if (cvcSpan) {
+        cvcSpan.innerText = getCardCvc(user.id, type);
+        cvcSpan.style.fontSize = '';
+    }
+}
     
     if (cvcSpan && user) {
         if (type === 'currency') {
@@ -330,9 +363,10 @@
 
 
             if (cardNumSpan) {
-                const first4 = "4824";
-                const last4 = user.id.toString().slice(-4);
-                cardNumSpan.innerText = `${first4} **** **** ${last4}`;
+                cardNumSpan.innerText = getCardNumber(user.id, 'credit');
+            }
+            if (cvcSpan) {
+                cvcSpan.innerText = getCardCvc(user.id, 'credit');
             }
             if (topName) topName.innerText = user.username;
             if (userNameSpan) userNameSpan.innerText = user.username;
@@ -385,17 +419,11 @@
                 creditVal.innerText = displayAmount;
                 creditVal.className = isPending ? 'text-5xl font-black tracking-tighter text-white/40 italic' : 'text-5xl font-black tracking-tighter text-white';
             }
-            if (cvcSpan) {
-                let cvc = user.id.toString().slice(-3);
-                cvc = cvc.padStart(3, '0');
-                cvcSpan.innerText = cvc;
-            }
             if (pendingLabel) isPending ? pendingLabel.classList.remove('hidden') : pendingLabel.classList.add('hidden');
             if (topBalanceSpan) topBalanceSpan.innerText = displayAmount;
         }
 
         
-
 const prevBtn = document.getElementById('prev-card');
 const nextBtn = document.getElementById('next-card');
 if (prevBtn && nextBtn) {
