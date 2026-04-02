@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>KedraBank — цифровий комфорт</title>
+    <title>KREDABank — цифровий комфорт</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -33,9 +33,9 @@
             </div>
         </div>
 
-        <img src="LOGO_MAIN.png" class="w-24 h-24 mb-6 shadow-2xl relative z-10" alt="KedraBank logo">
+        <img src="LOGO_MAIN.png" class="w-24 h-24 mb-6 shadow-2xl relative z-10" alt="KREDABank logo">
         <h1 class="text-5xl md:text-7xl font-black italic uppercase tracking-tighter mb-4 relative z-10 leading-none">
-            KEDRA<span class="text-white/20">BANK</span>
+            KREDA<span class="text-white/20">BANK</span>
         </h1>
         <p class="text-gray-500 text-[10px] font-black uppercase tracking-[0.4em] mb-12 italic relative z-10">
             Цифровий комфорт у світі Kherson, Ukraine
@@ -83,7 +83,7 @@
                                     4824 **** **** 0000
                                 </p>
                                 <div class="flex justify-between items-end">
-                                    <p class="text-[8px] text-white/20 uppercase font-bold">KedraBank</p>
+                                    <p class="text-[8px] text-white/20 uppercase font-bold">KREDABank</p>
                                     <p class="text-[10px] text-white/30">2026</p>
                                 </div>
                             </div>
@@ -172,7 +172,7 @@
             <h3 class="text-2xl font-black uppercase italic mb-2 tracking-tighter text-white">Заявка прийнята</h3>
             <div class="space-y-3 mb-8">
                 <p class="text-[11px] text-gray-400 leading-relaxed px-2">
-                    Ваша заявка на кредит успішно надіслана до <span class="text-white font-bold italic uppercase">KedraBank</span>.
+                    Ваша заявка на кредит успішно надіслана до <span class="text-white font-bold italic uppercase">KREDABank</span>.
                 </p>
                 <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
                     <p class="text-[9px] text-gray-500 uppercase font-black mb-1 text-left">Регламент розгляду</p>
@@ -501,7 +501,6 @@ applyCardType();
         isSwiping = false;
     });
     
-    // Для миші (десктоп) - можна додати драг
     let mouseStartX = 0;
     let isDragging = false;
     
@@ -587,11 +586,11 @@ function addSwipeAnimation(direction) {
                     title: "📋 НОВА ЗАЯВКА НА КРЕДИТ",
                     color: 0xffffff,
                     fields: [
-                        { name: "👤 Клієнт", value: `<@${user.id}> (${user.username})`, inline: false },
-                        { name: "💰 Сума", value: `${amount} ₴`, inline: true },
-                        { name: "📆 Термін", value: `${term} місяці(в)`, inline: true },
-                        { name: "🎮 Roblox Nickname", value: nick, inline: true },
-                        { name: "🎯 Мета", value: `\`\`\`${purpose.slice(0, 300)}\`\`\`` }
+                        { name: "Клієнт", value: `<@${user.id}> (${user.username})`, inline: false },
+                        { name: "Сума", value: `${amount} ₴`, inline: true },
+                        { name: "Термін", value: `${term} місяці(в)`, inline: true },
+                        { name: "Roblox Nickname", value: nick, inline: true },
+                        { name: "Мета", value: `\`\`\`${purpose.slice(0, 300)}\`\`\`` }
                     ],
                     footer: { text: `ID: ${user.id} • ${new Date().toLocaleString('uk-UA')}` }
                 }]
