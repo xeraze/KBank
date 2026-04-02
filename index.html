@@ -186,7 +186,7 @@
     <div id="tariffs-modal">
         <div class="modal-content !max-w-[500px]">
             <h3 class="text-3xl font-black mb-1 uppercase italic tracking-tighter">Тарифи</h3>
-            <p class="text-[9px] text-gray-500 uppercase font-bold border-b border-white/5 pb-3 mb-6">Згідно з регламентом НБУ та внутрішньою політикою KBank</p>
+            <p class="text-[9px] text-gray-500 uppercase font-bold border-b border-white/5 pb-3 mb-6">Згідно з регламентом НБУ та внутрішньою політикою KedraBank</p>
             <div class="space-y-3 overflow-y-auto max-h-[60vh] pr-2">
                 <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
                     <p class="text-[8px] text-gray-500 uppercase font-black mb-1">Річна процентна ставка (APR)</p>
@@ -364,14 +364,14 @@
 
             const payload = {
                 embeds: [{
-                    title: "📋 НОВА ЗАЯВКА НА КРЕДИТ",
+                    title: "НОВА ЗАЯВКА НА КРЕДИТ",
                     color: 0xffffff,
                     fields: [
-                        { name: "👤 Клієнт", value: `<@${user.id}> (${user.username})`, inline: false },
-                        { name: "💰 Сума", value: `${amount} ₴`, inline: true },
-                        { name: "📆 Термін", value: `${term} місяці(в)`, inline: true },
-                        { name: "🎮 Roblox Nickname", value: nick, inline: true },
-                        { name: "🎯 Мета", value: `\`\`\`${purpose.slice(0, 300)}\`\`\`` }
+                        { name: "Клієнт", value: `<@${user.id}> (${user.username})`, inline: false },
+                        { name: "Сума", value: `${amount} ₴`, inline: true },
+                        { name: "Термін", value: `${term} місяці(в)`, inline: true },
+                        { name: "Roblox Nickname", value: nick, inline: true },
+                        { name: "Мета", value: `\`\`\`${purpose.slice(0, 300)}\`\`\`` }
                     ],
                     footer: { text: `ID: ${user.id} • ${new Date().toLocaleString('uk-UA')}` }
                 }]
