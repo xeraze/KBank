@@ -27,7 +27,7 @@
       "status": "paid", 
       "term": "2",
       "cards": [
-        {"type": "credit", "status": "verification", "meetLink": "https://meet.google.com/ria-vzoj-iys"}
+        {"type": "credit", "status": "active"}
       ]
     }
   ]
