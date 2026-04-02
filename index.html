@@ -234,6 +234,8 @@
         const CLIENT_ID = '1488509930485841961';
         const WEBHOOK_URL = 'https://discord.com/api/webhooks/1488505884756938793/nx9kc5t7JlQAqN1cfIYraiTJqbOVaz5F-n1qZh-u-DPiW3VJ_4qE7BYCK_UKta-mDtjt';
         const JSON_URL = 'https://raw.githubusercontent.com/xeraze/KBank/main/database.json';
+        let cardTypeIndex = 0;
+        const cardTypes = ['credit', 'salary', 'currency'];
 
         let hasActiveLoan = false;
         let isLoadingData = true;
