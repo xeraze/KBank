@@ -761,6 +761,11 @@ function openCardRequestModal() {
         }
     }
     
+    if (missingCards.indexOf('credit') !== -1 && userAvailableCards.indexOf('credit') === -1) {
+        missingCards = missingCards.filter(function(c) { return c !== 'credit'; });
+        missingCards.unshift('credit');
+    }
+    
     if (missingCards.length === 0) {
         alert("У вас вже є всі доступні картки!");
         return;
