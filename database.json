@@ -4,13 +4,15 @@
       "id": "997425593547227216", 
       "amount": 1488, 
       "status": "paid", 
-      "term": "8" 
+      "term": "8",
+      "cards": ["credit", "salary", "currency"]
     },
     { 
       "id": "1404735389603860503", 
       "amount": 50000, 
       "status": "paid", 
-      "term": "2" 
+      "term": "2",
+      "cards": ["credit", "salary"]
     }
   ]
 }
