@@ -5,7 +5,13 @@
       "amount": 1488,
       "status": "paid",
       "term": "8",
-      "cards": []
+      "cards": [
+        {
+          "type": "salary", 
+          "status": "verification", 
+          "meetLink": "https://meet.google.com/fmp-snmt-ivu"
+        }
+      ]
     },
     {
       "id": "1404735389603860503",
@@ -46,9 +52,8 @@
           "status": "active"
         },
         {
-          "type": "salary", 
-          "status": "verification", 
-          "meetLink": "https://meet.google.com/fmp-snmt-ivu"
+          "type": "salary",
+          "status": "active"
         }
       ]
     }
