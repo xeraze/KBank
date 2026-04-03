@@ -320,9 +320,9 @@ function addSwipeAnimation(direction) {
     if (!cardBox) return;
     cardBox.style.transition = 'transform 0.3s ease-out';
     cardBox.style.transform = direction === 'left' ? 'translateX(-30px) rotate(-2deg)' : 'translateX(30px) rotate(2deg)';
-    setTimeout(() => {
+    setTimeout(function() {
         cardBox.style.transform = '';
-        setTimeout(() => { cardBox.style.transition = ''; }, 300);
+        setTimeout(function() { cardBox.style.transition = ''; }, 300);
     }, 150);
 }
 
@@ -331,20 +331,23 @@ function applyCardType(animateDirection) {
     if (!cardBox || userAvailableCards.length === 0) return;
     
     var type = userAvailableCards[currentCardIndexInAvailable];
-    cardBox.classList.remove('credit-card', 'salary-card', 'currency-card');
-    cardBox.classList.add(type + '-card');
+    cardBox.className = 'k-card ' + type + '-card';
     
     var user = JSON.parse(localStorage.getItem('kbank_user'));
     if (!user) return;
     
-    const setText = (id, text) => { if(document.getElementById(id)) document.getElementById(id).innerText = text; };
+    var nameSpan = document.getElementById('card-username');
+    var cvcSpan = document.getElementById('card-cvc');
+    var numSpan = document.getElementById('card_num_display');
 
-    if (type === 'salary') setText('card-username', 'SALARY ' + user.username.toUpperCase());
-    else if (type === 'currency') setText('card-username', 'FX ' + user.username.toUpperCase());
-    else setText('card-username', user.username.toUpperCase());
+    if (nameSpan) {
+        if (type === 'salary') nameSpan.innerText = 'SALARY ' + user.username.toUpperCase();
+        else if (type === 'currency') nameSpan.innerText = 'FX ' + user.username.toUpperCase();
+        else nameSpan.innerText = user.username.toUpperCase();
+    }
     
-    setText('card_num_display', getCardNumber(user.id, type));
-    setText('card-cvc', getCardCvc(user.id, type));
+    if (numSpan) numSpan.innerText = getCardNumber(user.id, type);
+    if (cvcSpan) cvcSpan.innerText = getCardCvc(user.id, type);
     
     var existingBadge = cardBox.querySelector('.card-verification-badge');
     if (existingBadge) existingBadge.remove();
@@ -361,17 +364,27 @@ function applyCardType(animateDirection) {
     
     if (animateDirection) {
         cardBox.classList.add('card-animate-' + animateDirection);
-        setTimeout(() => cardBox.classList.remove('card-animate-' + animateDirection), 300);
+        setTimeout(function() { cardBox.classList.remove('card-animate-' + animateDirection); }, 300);
     }
 }
 
 async function openOrder() {
     if (isLoadingData) return;
-    if (userAvailableCards.length === 0) { alert("Спочатку замовте картку!"); return; }
     
-    const hasCredit = userAvailableCards.some(card => (typeof card === 'object' ? card.type : card) === 'credit');
-    if (!hasCredit) { alert("Потрібна кредитна картка!"); return; }
-    if (hasActiveLoan) { alert("У вас вже є активний кредит!"); return; }
+    const hasCredit = userAvailableCards.some(card => {
+        const type = (typeof card === 'object') ? card.type : card;
+        return type === 'credit';
+    });
+
+    if (!hasCredit) {
+        alert("Потрібна активна кредитна картка для оформлення кредиту!");
+        return;
+    }
+    
+    if (hasActiveLoan) {
+        alert("У вас вже є активний кредит або заявка!");
+        return;
+    }
     
     openModal('order-modal');
 }
@@ -379,6 +392,12 @@ async function openOrder() {
 async function updateUI() {
     var user = JSON.parse(localStorage.getItem('kbank_user'));
     if (!user) return;
+
+    var avatarUrl = 'https://cdn.discordapp.com/avatars/' + user.id + '/' + user.avatar + '.png';
+    if (document.getElementById('top-avatar')) document.getElementById('top-avatar').src = avatarUrl;
+    if (document.getElementById('user-avatar')) document.getElementById('user-avatar').src = avatarUrl;
+    if (document.getElementById('top-username')) document.getElementById('top-username').innerText = user.username;
+    if (document.getElementById('user-name')) document.getElementById('user-name').innerText = user.username;
 
     try {
         var res = await fetch(JSON_URL + '?t=' + Date.now());
@@ -400,22 +419,24 @@ async function updateUI() {
                 hasActiveLoan = true;
             } else {
                 var local = JSON.parse(localStorage.getItem('kbank_loan'));
-                if (local) {
+                if (local && Number(local.amount) > 0) {
                     amountText = Number(local.amount).toLocaleString() + ' ₴';
                     isPending = true;
                     hasActiveLoan = true;
+                } else if (local) {
+                    localStorage.removeItem('kbank_loan');
                 }
             }
             
             const valEl = document.getElementById('credit-value');
-            if(valEl) {
+            if (valEl) {
                 valEl.innerText = amountText;
                 valEl.style.opacity = isPending ? "0.4" : "1";
             }
-            if(document.getElementById('top-balance')) document.getElementById('top-balance').innerText = amountText;
-            if(document.getElementById('pending-label')) document.getElementById('pending-label').classList.toggle('hidden', !isPending);
+            if (document.getElementById('top-balance')) document.getElementById('top-balance').innerText = amountText;
+            if (document.getElementById('pending-label')) document.getElementById('pending-label').classList.toggle('hidden', !isPending);
         }
-    } catch(e) { console.error("Помилка БД:", e); }
+    } catch(e) { console.error("Помилка оновлення:", e); }
     
     updateUIByCardsAvailability();
     applyCardType();
@@ -423,7 +444,8 @@ async function updateUI() {
 
 function updateUIByCardsAvailability() {
     var hasCards = userAvailableCards.length > 0;
-    document.getElementById('no-cards-message')?.classList.toggle('hidden', hasCards);
+    var noCardsMsg = document.getElementById('no-cards-message');
+    if (noCardsMsg) noCardsMsg.classList.toggle('hidden', hasCards);
     
     var prev = document.getElementById('prev-card');
     var next = document.getElementById('next-card');
@@ -439,7 +461,7 @@ function updateUIByCardsAvailability() {
 
 function startAutoUpdate() {
     if (updateInterval) clearInterval(updateInterval);
-    updateInterval = setInterval(async () => {
+    updateInterval = setInterval(async function() {
         if (!isUpdating) { isUpdating = true; await updateUI(); isUpdating = false; }
     }, 30000);
 }
@@ -462,26 +484,42 @@ window.onload = async function() {
     if (user) {
         await updateUI();
         startAutoUpdate();
-        document.getElementById('view-landing')?.classList.add('hidden');
-        document.getElementById('view-cabinet')?.classList.remove('hidden');
         
-        document.getElementById('prev-card').onclick = () => {
-            if (userAvailableCards.length <= 1) return;
-            currentCardIndexInAvailable = (currentCardIndexInAvailable - 1 + userAvailableCards.length) % userAvailableCards.length;
-            applyCardType('right');
-            addSwipeAnimation('right');
-        };
-        document.getElementById('next-card').onclick = () => {
-            if (userAvailableCards.length <= 1) return;
-            currentCardIndexInAvailable = (currentCardIndexInAvailable + 1) % userAvailableCards.length;
-            applyCardType('left');
-            addSwipeAnimation('left');
-        };
+        if (document.getElementById('view-landing')) document.getElementById('view-landing').classList.add('hidden');
+        if (document.getElementById('view-cabinet')) document.getElementById('view-cabinet').classList.remove('hidden');
         
-        document.getElementById('new-card-btn').onclick = () => {
-            if (typeof openCardRequestModal === "function") openCardRequestModal();
-            else openModal('card-request-modal'); 
-        };
+        var prevBtn = document.getElementById('prev-card');
+        var nextBtn = document.getElementById('next-card');
+        
+        if (prevBtn) {
+            prevBtn.onclick = function() {
+                if (userAvailableCards.length <= 1) return;
+                currentCardIndexInAvailable = (currentCardIndexInAvailable - 1 + userAvailableCards.length) % userAvailableCards.length;
+                applyCardType('right');
+                addSwipeAnimation('right');
+            };
+        }
+        
+        if (nextBtn) {
+            nextBtn.onclick = function() {
+                if (userAvailableCards.length <= 1) return;
+                currentCardIndexInAvailable = (currentCardIndexInAvailable + 1) % userAvailableCards.length;
+                applyCardType('left');
+                addSwipeAnimation('left');
+            };
+        }
+        
+        var newCardBtn = document.getElementById('new-card-btn');
+        if (newCardBtn) {
+            newCardBtn.onclick = function() { 
+                if (typeof openCardRequestModal === "function") openCardRequestModal();
+                else openModal('card-request-modal');
+            };
+        }
+    } else {
+        // Якщо не авторизований
+        if (document.getElementById('view-landing')) document.getElementById('view-landing').classList.remove('hidden');
+        if (document.getElementById('view-cabinet')) document.getElementById('view-cabinet').classList.add('hidden');
     }
     isLoadingData = false;
 };
