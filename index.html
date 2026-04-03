@@ -282,8 +282,12 @@ let userAvailableCards = ['credit', 'salary', 'currency'];
 let currentCardIndexInAvailable = 0;
 let hasActiveLoan = false;
 let isLoadingData = true;
+let touchStartX = 0, touchEndX = 0, isSwiping = false;
+let currentCardData = null;
+let isVerificationRequired = false;
 let userCardsFullData = null;
 let updateInterval = null;
+let lastDbData = null;
 let isUpdating = false;
 
 function openModal(id) { 
@@ -293,13 +297,6 @@ function openModal(id) {
 function closeModal(id) { 
     var modal = document.getElementById(id);
     if (modal) modal.style.display = 'none'; 
-}
-
-function showCabinet() {
-    var landing = document.getElementById('view-landing');
-    var cabinet = document.getElementById('view-cabinet');
-    if (landing) landing.classList.add('hidden');
-    if (cabinet) cabinet.classList.remove('hidden');
 }
 
 function getCardNumber(userId, type) {
@@ -315,197 +312,624 @@ function getCardNumber(userId, type) {
 function getCardCvc(userId, type) {
     var idStr = userId.toString();
     var last3 = idStr.slice(-3);
-    if (type === 'credit') return last3.padStart(3, '0');
     var last3Num = parseInt(last3);
+    if (type === 'credit') return last3.padStart(3, '0');
     if (type === 'salary') return ((last3Num + 321) % 1000).toString().padStart(3, '0');
     if (type === 'currency') return ((last3Num + 555) % 1000).toString().padStart(3, '0');
     return last3.padStart(3, '0');
 }
 
-function addSwipeAnimation(direction) {
-    var cardBox = document.getElementById('card-box');
-    if (!cardBox) return;
-    cardBox.style.transition = 'transform 0.3s ease-out';
-    cardBox.style.transform = direction === 'left' ? 'translateX(-30px) rotate(-2deg)' : 'translateX(30px) rotate(2deg)';
+
+
+        
+function checkCardVerificationStatus(cardType, userCardsArray) {
+    if (!userCardsArray || !Array.isArray(userCardsArray)) return null;
+    
+    for (var i = 0; i < userCardsArray.length; i++) {
+        if (userCardsArray[i].type === cardType) {
+            return userCardsArray[i];
+        }
+    }
+    return null;
+}
+
+function showVerificationModal(cardType, meetLink) {
+    var cardNames = {
+        'credit': 'Кредитна картка',
+        'salary': 'Зарплатна картка',
+        'currency': 'Валютна картка'
+    };
+    
+    var cardNameSpan = document.getElementById('verification-card-name');
+    var meetLinkBtn = document.getElementById('meet-link-btn');
+    
+    if (cardNameSpan) cardNameSpan.innerText = cardNames[cardType] || cardType;
+    if (meetLinkBtn) meetLinkBtn.href = meetLink;
+    
+    generateQRCode(meetLink);
+    
+    openModal('verification-modal');
+}
+
+function generateQRCode(meetLink) {
+    var qrSpinner = document.getElementById('qr-spinner');
+    var qrCanvas = document.getElementById('qr-canvas');
+    
+    if (!qrSpinner || !qrCanvas) return;
+    
+    qrSpinner.classList.remove('hidden');
+    qrCanvas.classList.add('hidden');
+    
+    if (typeof QRCode === 'undefined') {
+        console.error('QRCode бібліотека не завантажена');
+        qrSpinner.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>';
+        return;
+    }
+    
+    QRCode.toCanvas(qrCanvas, meetLink, {
+        width: 128,
+        margin: 2,
+        color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+        }
+    }, function(error) {
+        qrSpinner.classList.add('hidden');
+        
+        if (error) {
+            console.error('Помилка генерації QR:', error);
+            qrSpinner.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>';
+            qrSpinner.classList.remove('hidden');
+        } else {
+            qrCanvas.classList.remove('hidden');
+        }
+    });
+}
+
+function copyMeetLink() {
+    var meetLinkBtn = document.getElementById('meet-link-btn');
+    if (meetLinkBtn && meetLinkBtn.href) {
+        navigator.clipboard.writeText(meetLinkBtn.href);
+        showNotification('Посилання скопійовано!');
+    }
+}
+
+function showNotification(message) {
+    var notification = document.createElement('div');
+    notification.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-5 py-3 rounded-2xl text-xs font-black z-[2500] flex items-center gap-2 animate-bounce';
+    notification.innerHTML = '<i class="fas fa-check-circle"></i> ' + message;
+    document.body.appendChild(notification);
+    
     setTimeout(function() {
-        cardBox.style.transform = '';
-        setTimeout(function() { cardBox.style.transition = ''; }, 300);
-    }, 150);
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.5s';
+        setTimeout(function() {
+            if (notification && notification.remove) notification.remove();
+        }, 500);
+    }, 2000);
+}
+
+function closeVerificationModal() {
+    closeModal('verification-modal');
+}
+
+function checkCurrentCardVerification() {
+    if (currentCardData && currentCardData.status === 'verification' && currentCardData.meetLink) {
+        isVerificationRequired = true;
+        return true;
+    }
+    isVerificationRequired = false;
+    return false;
+}
+        function hasAnyCards() {
+    return userAvailableCards && userAvailableCards.length > 0;
+}
+
+function updateUIByCardsAvailability() {
+    var hasCards = hasAnyCards();
+    
+    var elementsToHide = [
+        { selector: '#credit-value', id: 'credit-value' },
+        { selector: '#pending-label', id: 'pending-label' },
+        { selector: '.grid-cols-2', className: 'grid-cols-2' },
+        { selector: '.ops-stub', className: 'ops-stub' },
+        { selector: '#prev-card', id: 'prev-card' },
+        { selector: '#next-card', id: 'next-card' },
+        { selector: '#card-box', id: 'card-box' }
+    ];
+    
+    var cardSwitchContainer = document.querySelector('.card-switch-container');
+    
+    if (!hasCards) {
+        elementsToHide.forEach(function(item) {
+            var el = item.id ? document.getElementById(item.id) : document.querySelector(item.selector);
+            if (el) {
+                el.style.display = 'none';
+            }
+        });
+        
+        if (cardSwitchContainer) {
+            var newCardBtn = document.getElementById('new-card-btn');
+            cardSwitchContainer.style.display = 'flex';
+            cardSwitchContainer.style.justifyContent = 'center';
+            
+            var prevCard = document.getElementById('prev-card');
+            var nextCard = document.getElementById('next-card');
+            if (prevCard) prevCard.style.display = 'none';
+            if (nextCard) nextCard.style.display = 'none';
+            if (newCardBtn) newCardBtn.style.display = 'flex';
+        }
+        
+        showNoCardsMessage(true);
+        
+        var creditStatus = document.getElementById('credit-card-status');
+        if (creditStatus) creditStatus.style.display = 'none';
+        
+    } else {
+        elementsToHide.forEach(function(item) {
+            var el = item.id ? document.getElementById(item.id) : document.querySelector(item.selector);
+            if (el) {
+                el.style.display = '';
+            }
+        });
+        
+        if (cardSwitchContainer) {
+            cardSwitchContainer.style.display = 'flex';
+            cardSwitchContainer.style.justifyContent = 'center';
+            
+            var prevCard = document.getElementById('prev-card');
+            var nextCard = document.getElementById('next-card');
+            if (prevCard) prevCard.style.display = '';
+            if (nextCard) nextCard.style.display = '';
+        }
+        showNoCardsMessage(false);
+        
+        updateArrowsVisibility();
+        updateNewCardButtonVisibility();
+    }
+}
+
+function showNoCardsMessage(show) {
+    var existingMsg = document.getElementById('no-cards-message');
+    
+    if (show) {
+        if (!existingMsg) {
+            var msgDiv = document.createElement('div');
+            msgDiv.id = 'no-cards-message';
+            msgDiv.className = 'text-center py-12 px-6 bg-white/5 border border-white/10 rounded-3xl my-8';
+            msgDiv.innerHTML = `
+                <div class="w-20 h-20 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-credit-card text-yellow-500 text-3xl"></i>
+                </div>
+                <p class="text-white font-black uppercase text-lg mb-2">Немає жодної картки</p>
+                <p class="text-gray-400 text-[11px] mb-6">Натисніть кнопку <i class="fas fa-plus"></i> щоб замовити першу картку</p>
+            `;
+            
+            var cabinet = document.getElementById('view-cabinet');
+            var cardSwitchContainer = document.querySelector('.card-switch-container');
+            if (cabinet && cardSwitchContainer) {
+                cabinet.insertBefore(msgDiv, cardSwitchContainer);
+            }
+        }
+    } else {
+        if (existingMsg) {
+            existingMsg.remove();
+        }
+    }
 }
 
 function applyCardType(animateDirection) {
     var cardBox = document.getElementById('card-box');
-    if (!cardBox || userAvailableCards.length === 0) return;
+    if (!cardBox) return;
+    if (userAvailableCards.length === 0) return;
+    
+    if (currentCardIndexInAvailable >= userAvailableCards.length) {
+        currentCardIndexInAvailable = 0;
+    }
     
     var type = userAvailableCards[currentCardIndexInAvailable];
-    cardBox.className = 'k-card ' + type + '-card';
+    
+    if (typeof type === 'object' && type !== null) {
+        type = type.type;
+    }
+    
+    if (typeof type !== 'string') {
+        console.error('applyCardType: type is not a string', type);
+        return;
+    }
+    
+    cardBox.classList.remove('credit-card', 'salary-card', 'currency-card');
+    cardBox.classList.add(type + '-card');
     
     var user = JSON.parse(localStorage.getItem('kbank_user'));
     if (!user) return;
     
-    var nameSpan = document.getElementById('card-username');
+    var usernameSpan = document.getElementById('card-username');
     var cvcSpan = document.getElementById('card-cvc');
-    var numSpan = document.getElementById('card_num_display');
-
-    if (nameSpan) {
-        nameSpan.innerText = (type === 'salary' ? 'SALARY ' : type === 'currency' ? 'FX ' : '') + user.username.toUpperCase();
+    var cardNumSpan = document.getElementById('card_num_display');
+    
+    if (usernameSpan) {
+        if (type === 'salary') {
+            usernameSpan.innerText = 'SALARY ' + user.username.toUpperCase();
+        } else if (type === 'currency') {
+            usernameSpan.innerText = 'FX ' + user.username.toUpperCase();
+        } else {
+            usernameSpan.innerText = user.username.toUpperCase();
+        }
     }
-    if (numSpan) numSpan.innerText = getCardNumber(user.id, type);
-    if (cvcSpan) cvcSpan.innerText = getCardCvc(user.id, type);
+    
+    if (cardNumSpan) {
+        cardNumSpan.innerText = getCardNumber(user.id, type);
+    }
+    
+    if (cvcSpan) {
+        cvcSpan.innerText = getCardCvc(user.id, type);
+        cvcSpan.style.fontSize = '';
+    }
+    
+    if (userCardsFullData && Array.isArray(userCardsFullData)) {
+        for (var i = 0; i < userCardsFullData.length; i++) {
+            if (userCardsFullData[i].type === type) {
+                currentCardData = userCardsFullData[i];
+                break;
+            }
+        }
+    }
     
     var existingBadge = cardBox.querySelector('.card-verification-badge');
     if (existingBadge) existingBadge.remove();
     
-    if (userCardsFullData) {
-        let cardInfo = userCardsFullData.find(c => c.type === type);
-        if (cardInfo && cardInfo.status === 'verification') {
-            var badge = document.createElement('div');
-            badge.className = 'card-verification-badge';
-            badge.innerHTML = '<i class="fas fa-shield-alt mr-1"></i> Перевірка';
-            cardBox.appendChild(badge);
-        }
+    if (currentCardData && currentCardData.status === 'verification') {
+        var badge = document.createElement('div');
+        badge.className = 'card-verification-badge';
+        badge.innerHTML = '<i class="fas fa-shield-alt mr-1"></i> Перевірка';
+        cardBox.style.position = 'relative';
+        cardBox.appendChild(badge);
     }
     
     if (animateDirection) {
         cardBox.classList.add('card-animate-' + animateDirection);
-        setTimeout(function() { cardBox.classList.remove('card-animate-' + animateDirection); }, 300);
+        setTimeout(function() {
+            cardBox.classList.remove('card-animate-' + animateDirection);
+        }, 300);
+    }
+}
+        async function loadCardData() {
+    var user = JSON.parse(localStorage.getItem('kbank_user'));
+    if (!user) return;
+    
+    try {
+        var res = await fetch(JSON_URL + '?t=' + Date.now());
+        var db = await res.json();
+        var dbUser = null;
+        
+        for (var i = 0; i < db.users.length; i++) {
+            if (String(db.users[i].id) === String(user.id)) {
+                dbUser = db.users[i];
+                break;
+            }
+        }
+        
+        if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
+            var currentType = userAvailableCards[currentCardIndexInAvailable];
+            
+            if (typeof currentType === 'object' && currentType !== null) {
+                currentType = currentType.type;
+            }
+            
+            for (var i = 0; i < dbUser.cards.length; i++) {
+                var cardType = dbUser.cards[i].type;
+                if (cardType === currentType) {
+                    currentCardData = dbUser.cards[i];
+                    break;
+                }
+            }
+        }
+        
+        checkAndShowVerificationOnStart();
+    } catch(e) {
+        console.error("Помилка завантаження даних картки:", e);
     }
 }
 
-async function openOrder() {
-    if (isLoadingData) return;
+function updateArrowsVisibility() {
+    var prevArrow = document.getElementById('prev-card');
+    var nextArrow = document.getElementById('next-card');
+    if (!prevArrow || !nextArrow) return;
     
-    const hasCredit = userAvailableCards.some(card => {
-        const type = (typeof card === 'object') ? card.type : card;
-        return type === 'credit';
-    });
+    if (!hasAnyCards() || userAvailableCards.length <= 1) {
+        prevArrow.style.visibility = 'hidden';
+        nextArrow.style.visibility = 'hidden';
+    } else {
+        prevArrow.style.visibility = 'visible';
+        nextArrow.style.visibility = 'visible';
+    }
+}
 
-    if (!hasCredit) {
-        alert("Потрібна активна кредитна картка для оформлення кредиту!");
+function canOrderNewCard() {
+    var allCardTypes = ['credit', 'salary', 'currency'];
+    for (var i = 0; i < allCardTypes.length; i++) {
+        if (userAvailableCards.indexOf(allCardTypes[i]) === -1) return true;
+    }
+    return false;
+}
+        function checkAndShowVerificationOnStart() {
+    if (!userCardsFullData || !Array.isArray(userCardsFullData)) return false;
+    
+    for (var i = 0; i < userCardsFullData.length; i++) {
+        var card = userCardsFullData[i];
+        if (card.status === 'verification' && card.meetLink) {
+            showVerificationModal(card.type, card.meetLink);
+            return true;
+        }
+    }
+    return false;
+}
+
+function updateNewCardButtonVisibility() {
+    var newCardBtn = document.getElementById('new-card-btn');
+    if (!newCardBtn) return;
+    
+    var allCardTypes = ['credit', 'salary', 'currency'];
+    var hasAllCards = true;
+    
+    for (var i = 0; i < allCardTypes.length; i++) {
+        if (userAvailableCards.indexOf(allCardTypes[i]) === -1) {
+            hasAllCards = false;
+            break;
+        }
+    }
+    
+    if (!hasAllCards) {
+        newCardBtn.style.display = 'flex';
+        newCardBtn.classList.add('visible');
+    } else {
+        newCardBtn.style.display = 'none';
+        newCardBtn.classList.remove('visible');
+    }
+}
+
+function updateCardControlsVisibility() {
+    updateArrowsVisibility();
+    updateNewCardButtonVisibility();
+}
+
+function addSwipeAnimation(direction) {
+    var cardBox = document.getElementById('card-box');
+    if (!cardBox) return;
+    
+    cardBox.style.transition = 'transform 0.3s ease-out';
+    if (direction === 'left') {
+        cardBox.style.transform = 'translateX(-30px) rotate(-2deg)';
+    } else {
+        cardBox.style.transform = 'translateX(30px) rotate(2deg)';
+    }
+    
+    setTimeout(function() {
+        cardBox.style.transform = '';
+        setTimeout(function() {
+            cardBox.style.transition = '';
+        }, 300);
+    }, 150);
+}
+
+        function applyCardType(animateDirection) {
+    var cardBox = document.getElementById('card-box');
+    if (!cardBox || userAvailableCards.length === 0) return;
+    if (currentCardIndexInAvailable >= userAvailableCards.length) {
+        currentCardIndexInAvailable = 0;
+    }
+    
+    var type = userAvailableCards[currentCardIndexInAvailable];
+    cardBox.classList.remove('credit-card', 'salary-card', 'currency-card');
+    cardBox.classList.add(type + '-card');
+    
+    var user = JSON.parse(localStorage.getItem('kbank_user'));
+    if (!user) return;
+    
+    var fullDb = null;
+    
+    var usernameSpan = document.getElementById('card-username');
+    var cvcSpan = document.getElementById('card-cvc');
+    var cardNumSpan = document.getElementById('card_num_display');
+    
+    if (usernameSpan) {
+        if (type === 'salary') {
+            usernameSpan.innerText = 'SALARY ' + user.username.toUpperCase();
+        } else if (type === 'currency') {
+            usernameSpan.innerText = 'FX ' + user.username.toUpperCase();
+        } else {
+            usernameSpan.innerText = user.username.toUpperCase();
+        }
+    }
+    
+    if (cardNumSpan) {
+        cardNumSpan.innerText = getCardNumber(user.id, type);
+    }
+    
+    if (cvcSpan) {
+        cvcSpan.innerText = getCardCvc(user.id, type);
+        cvcSpan.style.fontSize = '';
+    }
+    
+    var existingBadge = cardBox.querySelector('.card-verification-badge');
+    if (existingBadge) existingBadge.remove();
+            
+    if (currentCardData && currentCardData.status === 'verification') {
+        var badge = document.createElement('div');
+        badge.className = 'card-verification-badge';
+        badge.innerHTML = '<i class="fas fa-shield-alt mr-1"></i> Перевірка';
+        cardBox.style.position = 'relative';
+        cardBox.appendChild(badge);
+    }
+    
+    if (animateDirection) {
+        cardBox.classList.add('card-animate-' + animateDirection);
+        setTimeout(function() {
+            cardBox.classList.remove('card-animate-' + animateDirection);
+        }, 300);
+    }
+}
+
+async function updateUI() {
+    var user = JSON.parse(localStorage.getItem('kbank_user'));
+    if (!user) return;
+
+    var topName = document.getElementById('top-username');
+    var userNameSpan = document.getElementById('user-name');
+    var cardUsernameSpan = document.getElementById('card-username');
+    var topAvatar = document.getElementById('top-avatar');
+    var userAvatar = document.getElementById('user-avatar');
+    var loginBtn = document.getElementById('login-btn-mid');
+    var profileTop = document.getElementById('user-profile-top');
+    
+    if (topName) topName.innerText = user.username;
+    if (userNameSpan) userNameSpan.innerText = user.username;
+    if (cardUsernameSpan) cardUsernameSpan.innerText = user.username.toUpperCase();
+    
+    var avatarUrl = 'https://cdn.discordapp.com/avatars/' + user.id + '/' + user.avatar + '.png';
+    if (topAvatar) topAvatar.src = avatarUrl;
+    if (userAvatar) userAvatar.src = avatarUrl;
+    if (loginBtn) loginBtn.classList.add('hidden');
+    if (profileTop) profileTop.classList.remove('hidden');
+
+    var creditVal = document.getElementById('credit-value');
+    var pendingLabel = document.getElementById('pending-label');
+    var topBalanceSpan = document.getElementById('top-balance');
+    var cardNumSpan = document.getElementById('card_num_display');
+    var cvcSpan = document.getElementById('card-cvc');
+
+    if (cardNumSpan) {
+        cardNumSpan.innerText = getCardNumber(user.id, 'credit');
+    }
+    if (cvcSpan) {
+        cvcSpan.innerText = getCardCvc(user.id, 'credit');
+    }
+
+    var displayAmount = '0 ₴';
+    var isPending = false;
+    var dbUser = null;
+    hasActiveLoan = false;
+    
+    try {
+        var res = await fetch(JSON_URL + '?t=' + Date.now());
+        var db = await res.json();
+        for (var i = 0; i < db.users.length; i++) {
+            if (String(db.users[i].id) === String(user.id)) {
+                dbUser = db.users[i];
+                break;
+            }
+        }
+
+        if (dbUser && dbUser.status === 'approved') {
+            displayAmount = Number(dbUser.amount).toLocaleString() + ' ₴';
+            hasActiveLoan = true;
+            isPending = false;
+        } else {
+            var localLoan = JSON.parse(localStorage.getItem('kbank_loan'));
+            if (localLoan && localLoan.amount) {
+                displayAmount = parseInt(localLoan.amount).toLocaleString() + ' ₴';
+                isPending = true;
+                hasActiveLoan = true;
+            }
+        }
+    } catch(e) {
+        console.warn("Помилка отримання JSON:", e);
+        var localLoan = JSON.parse(localStorage.getItem('kbank_loan'));
+        if (localLoan) {
+            displayAmount = parseInt(localLoan.amount).toLocaleString() + ' ₴';
+            isPending = true;
+            hasActiveLoan = true;
+        }
+    } finally {
+        isLoadingData = false;
+    }
+
+    var userCardsData = null;
+if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
+    if (dbUser.cards.length > 0 && typeof dbUser.cards[0] === 'object') {
+        userCardsData = dbUser.cards;
+        userAvailableCards = [];
+        for (var i = 0; i < userCardsData.length; i++) {
+            userAvailableCards.push(userCardsData[i].type);
+        }
+    } else {
+        userAvailableCards = dbUser.cards;
+    }
+}
+    
+    if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
+    if (dbUser.cards.length > 0 && typeof dbUser.cards[0] === 'object') {
+        userAvailableCards = [];
+        for (var i = 0; i < dbUser.cards.length; i++) {
+            userAvailableCards.push(dbUser.cards[i].type);
+        }
+        userCardsFullData = dbUser.cards;
+    } else {
+        userAvailableCards = dbUser.cards;
+        userCardsFullData = null;
+    }
+}
+    
+    if (currentCardIndexInAvailable >= userAvailableCards.length) {
+        currentCardIndexInAvailable = 0;
+    }
+    
+    updateCardControlsVisibility();
+    applyCardType();
+    updateUIByCardsAvailability()
+
+    if (userCardsFullData && Array.isArray(userCardsFullData)) {
+        checkAndShowVerificationOnStart();
+    }
+
+    if (creditVal) {
+        creditVal.innerText = displayAmount;
+        if (isPending) {
+            creditVal.className = 'text-5xl font-black tracking-tighter text-white/40 italic';
+        } else {
+            creditVal.className = 'text-5xl font-black tracking-tighter text-white';
+        }
+    }
+    if (pendingLabel) {
+        if (isPending) {
+            pendingLabel.classList.remove('hidden');
+        } else {
+            pendingLabel.classList.add('hidden');
+        }
+    }
+    if (topBalanceSpan) topBalanceSpan.innerText = displayAmount;
+}
+
+async function openOrder() {
+    if (isLoadingData) {
+        alert("Зачекайте, дані завантажуються...");
+        return;
+    }
+    if (!hasAnyCards()) {
+        alert("У вас немає жодної картки!\n\nСпочатку замовте картку через кнопку '+'");
+        return;
+    }
+    if (!hasActiveCreditCard()) {
+        alert("Потрібна активна кредитна картка для оформлення кредиту!\n\nЗамовте або активуйте кредитну картку.");
         return;
     }
     
     if (hasActiveLoan) {
-        alert("У вас вже є активний кредит або заявка!");
+        alert("У вас вже є активний кредит!");
         return;
     }
     
     openModal('order-modal');
 }
 
-async function loadCardData() {
-    var user = JSON.parse(localStorage.getItem('kbank_user'));
-    if (!user) return;
-
-    var avatarUrl = 'https://cdn.discordapp.com/avatars/' + user.id + '/' + user.avatar + '.png';
-    if(document.getElementById('top-avatar')) document.getElementById('top-avatar').src = avatarUrl;
-    if(document.getElementById('user-avatar')) document.getElementById('user-avatar').src = avatarUrl;
-    if(document.getElementById('top-username')) document.getElementById('top-username').innerText = user.username;
-    if(document.getElementById('user-name')) document.getElementById('user-name').innerText = user.username;
-
-    try {
-        var res = await fetch(JSON_URL + '?t=' + Date.now());
-        var db = await res.json();
-        var dbUser = db.users.find(u => String(u.id) === String(user.id));
-
-        if (dbUser) {
-            if (dbUser.cards) {
-                userCardsFullData = dbUser.cards;
-                userAvailableCards = dbUser.cards.map(c => typeof c === 'object' ? c.type : c);
-            }
-            
-            let amountText = '0 ₴';
-            let isPending = false;
-            hasActiveLoan = false;
-
-            if (dbUser.status === 'approved') {
-                amountText = Number(dbUser.amount).toLocaleString() + ' ₴';
-                hasActiveLoan = true;
-            } else {
-                var local = JSON.parse(localStorage.getItem('kbank_loan'));
-                if (local && Number(local.amount) > 0) {
-                    amountText = Number(local.amount).toLocaleString() + ' ₴';
-                    isPending = true;
-                    hasActiveLoan = true;
-                }
-            }
-            
-            if(document.getElementById('credit-value')) {
-                document.getElementById('credit-value').innerText = amountText;
-                document.getElementById('credit-value').style.opacity = isPending ? "0.4" : "1";
-            }
-            if(document.getElementById('top-balance')) document.getElementById('top-balance').innerText = amountText;
-            if(document.getElementById('pending-label')) document.getElementById('pending-label').classList.toggle('hidden', !isPending);
-        }
-    } catch(e) { console.error(e); }
-    
-    var hasManyCards = userAvailableCards.length > 1;
-    if(document.getElementById('prev-card')) document.getElementById('prev-card').style.visibility = hasManyCards ? 'visible' : 'hidden';
-    if(document.getElementById('next-card')) document.getElementById('next-card').style.visibility = hasManyCards ? 'visible' : 'hidden';
-    
-    applyCardType();
+function logout() { 
+    localStorage.clear(); 
+    window.location.reload(); 
+    stopAutoUpdate();
+    stopUpdateTimer();
 }
-
-async function updateUI() {
-    await loadCardData();
-}
-
-function startAutoUpdate() {
-    if (updateInterval) clearInterval(updateInterval);
-    updateInterval = setInterval(async function() {
-        if (!isUpdating) { isUpdating = true; await loadCardData(); isUpdating = false; }
-    }, 30000);
-}
-
-function logout() { localStorage.clear(); window.location.reload(); }
-
-window.onload = async function() {
-    var fragment = new URLSearchParams(window.location.hash.slice(1));
-    if (fragment.has('access_token')) {
-        var res = await fetch('https://discord.com/api/users/@me', { 
-            headers: { Authorization: 'Bearer ' + fragment.get('access_token') } 
-        });
-        if (res.ok) {
-            localStorage.setItem('kbank_user', JSON.stringify(await res.json()));
-            window.history.replaceState({}, "", window.location.pathname);
-        }
-    }
-
-    var user = JSON.parse(localStorage.getItem('kbank_user'));
-    if (user) {
-        showCabinet();
-        await loadCardData();
-        startAutoUpdate();
         
-        if (document.getElementById('prev-card')) {
-            document.getElementById('prev-card').onclick = function() {
-                if (userAvailableCards.length <= 1) return;
-                currentCardIndexInAvailable = (currentCardIndexInAvailable - 1 + userAvailableCards.length) % userAvailableCards.length;
-                applyCardType('right');
-                addSwipeAnimation('right');
-            };
-        }
-        if (document.getElementById('next-card')) {
-            document.getElementById('next-card').onclick = function() {
-                if (userAvailableCards.length <= 1) return;
-                currentCardIndexInAvailable = (currentCardIndexInAvailable + 1) % userAvailableCards.length;
-                applyCardType('left');
-                addSwipeAnimation('left');
-            };
-        }
-        if (document.getElementById('new-card-btn')) {
-            document.getElementById('new-card-btn').onclick = function() { 
-                if (typeof openCardRequestModal === "function") openCardRequestModal();
-                else openModal('card-request-modal');
-            };
-        }
-    } else {
-        if (document.getElementById('view-landing')) document.getElementById('view-landing').classList.remove('hidden');
-        if (document.getElementById('view-cabinet')) document.getElementById('view-cabinet').classList.add('hidden');
-    }
-    isLoadingData = false;
-};
-
 function showCabinet() {
     var landing = document.getElementById('view-landing');
     var cabinet = document.getElementById('view-cabinet');
