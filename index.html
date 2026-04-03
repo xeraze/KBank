@@ -772,36 +772,24 @@ async function updateUI() {
     var user = JSON.parse(localStorage.getItem('kbank_user'));
     if (!user) return;
 
-    var topName = document.getElementById('top-username');
-    var userNameSpan = document.getElementById('user-name');
-    var cardUsernameSpan = document.getElementById('card-username');
-    var topAvatar = document.getElementById('top-avatar');
-    var userAvatar = document.getElementById('user-avatar');
-    var loginBtn = document.getElementById('login-btn-mid');
-    var profileTop = document.getElementById('user-profile-top');
-    
-    if (topName) topName.innerText = user.username;
-    if (userNameSpan) userNameSpan.innerText = user.username;
-    if (cardUsernameSpan) cardUsernameSpan.innerText = user.username.toUpperCase();
+    const setText = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = text;
+    };
+
+    setText('top-username', user.username);
+    setText('user-name', user.username);
     
     var avatarUrl = 'https://cdn.discordapp.com/avatars/' + user.id + '/' + user.avatar + '.png';
+    var topAvatar = document.getElementById('top-avatar');
+    var userAvatar = document.getElementById('user-avatar');
     if (topAvatar) topAvatar.src = avatarUrl;
     if (userAvatar) userAvatar.src = avatarUrl;
+
+    var loginBtn = document.getElementById('login-btn-mid');
+    var profileTop = document.getElementById('user-profile-top');
     if (loginBtn) loginBtn.classList.add('hidden');
     if (profileTop) profileTop.classList.remove('hidden');
-
-    var creditVal = document.getElementById('credit-value');
-    var pendingLabel = document.getElementById('pending-label');
-    var topBalanceSpan = document.getElementById('top-balance');
-    var cardNumSpan = document.getElementById('card_num_display');
-    var cvcSpan = document.getElementById('card-cvc');
-
-    if (cardNumSpan) {
-        cardNumSpan.innerText = getCardNumber(user.id, 'credit');
-    }
-    if (cvcSpan) {
-        cvcSpan.innerText = getCardCvc(user.id, 'credit');
-    }
 
     var displayAmount = '0 ₴';
     var isPending = false;
@@ -811,48 +799,41 @@ async function updateUI() {
     try {
         var res = await fetch(JSON_URL + '?t=' + Date.now());
         var db = await res.json();
-        for (var i = 0; i < db.users.length; i++) {
-            if (String(db.users[i].id) === String(user.id)) {
-                dbUser = db.users[i];
-                break;
-            }
-        }
+        dbUser = db.users.find(u => String(u.id) === String(user.id));
 
         if (dbUser && dbUser.status === 'approved') {
             displayAmount = Number(dbUser.amount).toLocaleString() + ' ₴';
             hasActiveLoan = true;
-            isPending = false;
         } else {
             var localLoan = JSON.parse(localStorage.getItem('kbank_loan'));
-            if (localLoan && localLoan.amount) {
+            if (localLoan) {
                 displayAmount = parseInt(localLoan.amount).toLocaleString() + ' ₴';
                 isPending = true;
                 hasActiveLoan = true;
             }
         }
     } catch(e) {
-        console.warn("Помилка отримання JSON:", e);
-        var localLoan = JSON.parse(localStorage.getItem('kbank_loan'));
-        if (localLoan) {
-            displayAmount = parseInt(localLoan.amount).toLocaleString() + ' ₴';
-            isPending = true;
-            hasActiveLoan = true;
-        }
-    } finally {
-        isLoadingData = false;
+        console.warn("Помилка БД:", e);
     }
 
-    var userCardsData = null;
-if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
-    if (dbUser.cards.length > 0 && typeof dbUser.cards[0] === 'object') {
-        userCardsData = dbUser.cards;
-        userAvailableCards = [];
-        for (var i = 0; i < userCardsData.length; i++) {
-            userAvailableCards.push(userCardsData[i].type);
-        }
-    } else {
-        userAvailableCards = dbUser.cards;
+    if (dbUser && dbUser.cards) {
+        userCardsFullData = dbUser.cards;
+        userAvailableCards = dbUser.cards.map(c => typeof c === 'object' ? c.type : c);
     }
+    
+    updateCardControlsVisibility();
+    applyCardType();
+    updateUIByCardsAvailability();
+
+    const creditVal = document.getElementById('credit-value');
+    if (creditVal) {
+        creditVal.innerText = displayAmount;
+        creditVal.style.opacity = isPending ? "0.4" : "1";
+    }
+    setText('top-balance', displayAmount);
+    
+    const pendingLabel = document.getElementById('pending-label');
+    if (pendingLabel) pendingLabel.classList.toggle('hidden', !isPending);
 }
     
     if (dbUser && dbUser.cards && Array.isArray(dbUser.cards)) {
