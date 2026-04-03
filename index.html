@@ -319,9 +319,6 @@ function getCardCvc(userId, type) {
     return last3.padStart(3, '0');
 }
 
-
-
-        
 function checkCardVerificationStatus(cardType, userCardsArray) {
     if (!userCardsArray || !Array.isArray(userCardsArray)) return null;
     
@@ -906,11 +903,23 @@ async function openOrder() {
         alert("Зачекайте, дані завантажуються...");
         return;
     }
-    if (!hasAnyCards()) {
+    
+    if (!userAvailableCards || userAvailableCards.length === 0) {
         alert("У вас немає жодної картки!\n\nСпочатку замовте картку через кнопку '+'");
         return;
     }
-    if (!hasActiveCreditCard()) {
+
+    let hasCredit = false;
+    for (let i = 0; i < userAvailableCards.length; i++) {
+        let card = userAvailableCards[i];
+        let type = (typeof card === 'object' && card !== null) ? card.type : card;
+        if (type === 'credit') {
+            hasCredit = true;
+            break;
+        }
+    }
+
+    if (!hasCredit) {
         alert("Потрібна активна кредитна картка для оформлення кредиту!\n\nЗамовте або активуйте кредитну картку.");
         return;
     }
@@ -947,8 +956,27 @@ function showLanding() {
 }
 
 function toggleProfileMenu() {
-    var menu = document.getElementById('profile-menu');
-    if (menu) menu.classList.toggle('hidden');
+    var profileTop = document.getElementById('user-profile-top');
+    if (profileTop && !profileTop.classList.contains('relative')) {
+        profileTop.classList.add('relative');
+    }
+
+    var dropdown = document.getElementById('profile-dropdown') || document.getElementById('profile-menu');
+    
+    if (!dropdown && profileTop) {
+        var btn = profileTop.querySelector('button');
+        if (btn && btn.nextElementSibling) {
+            dropdown = btn.nextElementSibling;
+        }
+    }
+
+    if (dropdown) {
+        dropdown.classList.toggle('hidden');
+        dropdown.style.position = 'absolute';
+        dropdown.style.top = '100%';
+        dropdown.style.right = '0';
+        dropdown.style.zIndex = '50';
+    }
 }
 
 function loginDiscord() {
