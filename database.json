@@ -31,9 +31,9 @@
     },
     {
       "id": "1278807991377989697",
-      "amount": 0,
-      "status": "paid",
-      "term": "2",
+      "amount": 1000000,
+      "status": "approved",
+      "term": "3",
       "cards": [
         {
           "type": "credit",
